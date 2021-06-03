@@ -13,24 +13,6 @@ def disk_shape(r, center, size):
     return mask, np.sum(mask)
 
 
-def wlgPrecalculateComp(img, alpha, mask, P):
-    kernel = np.zeros((max(mask[0])+1, max(mask[1])+1))
-    kernel[mask] = 1
-
-    c_img = img.copy()
-    c_img = np.ndarray.astype(c_img, np.int32)
-    # c_img = c_img / 255
-
-    neighbourhood = convolve(c_img, kernel, mode='nearest', cval=0)
-    gci = neighbourhood - c_img
-
-    res = (c_img * alpha + gci) / (alpha + P)
-    res = np.ndarray.astype(res, np.int32)
-    # res_norm = (res - np.min(res)) / np.ptp(res)
-
-    return res
-
-
 def rlbp_s(wlg, pos, mask, image):
     neighbours = image[mask]
     sub = neighbours/255 - wlg[pos]
@@ -50,6 +32,11 @@ def rlbp_m(wlg, pos, mask, thresh):
     two = np.full(len(m_c), 2)
     return np.sum((m_c * two) ** idx)
 
+def vec_pulse(i):
+    if i > 0:
+        return 1
+    else:
+        return 0
 
 def zero_shift(mat, h, v):
     r, c = mat.shape
@@ -76,60 +63,63 @@ def zero_shift(mat, h, v):
 
     return res_m
 
+def wlgPrecalculateComp(img, alpha, mask, P):
+    kernel = np.zeros((max(mask[0])+1, max(mask[1])+1))
+    kernel[mask] = 1
 
-def vec_pulse(i):
-    if i > 0:
-        return 1
-    else:
-        return 0
+    c_img = img.copy()
+    c_img = np.ndarray.astype(c_img, np.float32)
+    # c_img = c_img / 255
+
+    neighbourhood = convolve(c_img, kernel, mode='nearest', cval=0)
+    gci = neighbourhood - c_img
+
+    res = (c_img * alpha + gci) / (alpha + P)
+
+    # res_norm = (res - np.min(res)) / np.ptp(res)
+
+    return res
 
 
 def rlbp_s_mat(wlg, mask, img, zindexed):
     mask_dx = mask[0] - 2
     mask_dy = mask[1] - 2
 
-    h, w = wlg.shape
-    img_norm = img / 255
-    stack = []
-    for i, j in zip(mask_dx, mask_dy):
-        sh = zero_shift(img_norm, j, i) - wlg
-        stack.append(sh.reshape(1, h * w))
+    final = None
+    for idx, (i, j) in enumerate(zip(mask_dx, mask_dy)):
+        sh = zero_shift(img, j, i) - wlg
+        sh[sh > 0] = 1
+        sh[sh < 0] = 0
+        part = (sh * 2) ** idx
+        if final is None:
+            final = part
+        else:
+            final = final + part
 
-    stack = np.concatenate(tuple(stack), axis=1)
-    stack = np.swapaxes(stack.reshape((h, w, len(mask_dx)), order='F'), 0, 1)
-
-    stack[stack > 0] = 1
-    stack[stack < 0] = 0
-    onezero = stack
-
-    idx_mat = onezero * zindexed
-    res = (onezero * 2) ** idx_mat
-    return res
+    return final
 
 
 def rlbp_m_mat(wlg, mask, thresh, zindexed):
-    mask_dx = mask[0] - 3
-    mask_dy = mask[1] - 3
+    mask_dx = mask[0] - 2
+    mask_dy = mask[1] - 2
 
-    stack = []
-    h, w = wlg.shape
-    for i, j in zip(mask_dx, mask_dy):
-        sh = zero_shift(wlg, j, i) - wlg - thresh
-        stack.append(sh.reshape(1, h*w))
+    final = None
+    for idx, (i, j) in enumerate(zip(mask_dx, mask_dy)):
+        zs = zero_shift(wlg, j, i)
+        sh = np.abs(zs - wlg) - 0
+        sh[sh > 0] = 1
+        sh[sh < 0] = 0
+        part = (sh * 2) ** idx
+        if final is None:
+            final = part
+        else:
+            final = final + part
 
-    stack = np.concatenate(tuple(stack), axis=1)
-    stack = np.swapaxes(stack.reshape((h, w, len(mask_dx)), order='F'), 0, 1)
-
-    stack[stack > 0] = 1
-    stack[stack < 0] = 0
-    onezero = stack
-
-    idx_mat = onezero * zindexed
-    res = (onezero * 2) ** idx_mat
-    return res
+    return final
 
 
 def rlbp_short(img, mask, threshold, alpha):
+    img = img.astype(np.int32)
     zindexed = np.arange(1, len(mask[0])+1).reshape((1, 1, len(mask[0])))
 
     wlg = wlgPrecalculateComp(img, alpha, mask, len(mask[0]))

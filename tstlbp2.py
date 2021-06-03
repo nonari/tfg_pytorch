@@ -5,19 +5,19 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-mask, P = disk_shape(3, (3,3), (16,16))
-mask[3, 3] = False
+mask, P = disk_shape(2, (2,2), (16,16))
+mask[2, 2] = False
 mask = np.where(mask)
 
 for i in range(1):
-    img_path = f'/home/nonari/Documentos/itg/vehicle/0a0a00b2fbe89a47.jpg'
+    img_path = f'./road.jpg'
 
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     t1 = time.time()
 
 
     #rlbp_s, rlbp_m = rlbp(img, mask, P, alpha=0.2, threshold=np.mean(img))
-    rlbp_s, rlbp_m = rlbp_short(img, mask, alpha=0.2, threshold=np.mean(img))
+    rlbp_s, rlbp_m = rlbp_short(img, mask, alpha=0.2, threshold=30)
     print("XXX", time.time() - t1)
     cv2.imshow("s", rlbp_s)
     cv2.imshow("m", rlbp_m)
