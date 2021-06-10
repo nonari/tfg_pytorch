@@ -7,7 +7,8 @@ from torch.utils.data import Dataset
 import torch
 import random
 import numpy as np
-
+import ntpath
+from utils import t_utils
 
 
 def im_to_tensor(im):
@@ -75,6 +76,12 @@ class Test_Loader(ISBI_Loader):
         # Initialization function, read all the pictures under data_path
         super().__init__(data_path, patient_left)
         self.imgs_path = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
+
+    def __getitem__(self, index):
+        img, seg = ISBI_Loader.__getitem__(self, index)
+        image_path = self.imgs_path[index]
+        filename = ntpath.basename(image_path)
+        return img, seg, filename
 
 
 if __name__ == "__main__":

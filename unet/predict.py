@@ -56,5 +56,6 @@ if __name__ == "__main__":
     for idx in range(0, 9):
         nmask = np.where(g[idx, :, :] == 255)
         r[nmask] = idx + 1
+    r = np.logical_and(g[1]==255, g[2]==255)
     pyplot.imshow(r)
     pyplot.show()
