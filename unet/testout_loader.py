@@ -40,55 +40,37 @@ im_trans = transforms.Compose([
     transforms.Resize((512, 512), transforms.InterpolationMode.BILINEAR)
 ])
 
-class ISBI_Loader(Dataset):
-    def __init__(self, data_path, patient_left=0):
+
+class Loader(Dataset):
+    def __init__(self, data_path):
         # Initialization function, read all the pictures under data_path
         self.data_path = data_path
-        self.patient_left = patient_left
-        discard = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
         self.imgs_path = glob.glob(os.path.join(data_path, f'img_*'))
-        for path in discard:
-            self.imgs_path.remove(path)
 
     def __getitem__(self, index):
         # Read pictures according to index
         image_path = self.imgs_path[index]
-        # Generate label_path according to image_path
-        label_path = image_path.replace('img', 'seg')
         # Read training pictures and label pictures
         image = cv2.imread(image_path)
-        label = cv2.imread(label_path)
         # Convert the data to a single channel picture
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
 
         image = im_trans(image)
         # Process the label, change the pixel value of 255 to 1
-        return image, im_to_tensor(label)
+        return image, {}
 
     def __len__(self):
         # Return the training set size
         return len(self.imgs_path)
 
 
-class Test_Loader(ISBI_Loader):
-    def __init__(self, data_path, patient_left=0):
+class Test_Loader(Loader):
+    def __init__(self, data_path):
         # Initialization function, read all the pictures under data_path
-        super().__init__(data_path, patient_left)
-        self.imgs_path = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
+        super().__init__(data_path)
 
     def __getitem__(self, index):
-        img, seg = ISBI_Loader.__getitem__(self, index)
+        img, seg = Loader.__getitem__(self, index)
         image_path = self.imgs_path[index]
         filename = ntpath.basename(image_path)
         return img, seg, filename
-
-
-if __name__ == "__main__":
-    isbi_dataset = ISBI_Loader("data/train/")
-    print("Number of data:", len(isbi_dataset))
-    train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
-                                           batch_size=2,
-                                           shuffle=True)
-    for image, label in train_loader:
-        print(image.shape)

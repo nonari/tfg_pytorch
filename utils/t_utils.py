@@ -9,9 +9,18 @@ def prediction_to_mask(tensor):
     # TODO this method leaves background gaps
     tn[tn > 0.5] = 255
     mask = np.zeros(tn.shape[2:])
-    for idx in range(0, 9):
+    for idx in range(0, 10):
         layer = np.where(tn[0, idx, :, :] == 255)
         mask[layer] = idx + 1
+    return mask
+
+
+def prediction_to_mask_x(tensor):
+    tn = tensor.clone().detach()
+    arr = torch.squeeze(tn, dim=0).numpy()
+    mask = np.argmax(arr, axis=0)
+    mask = mask + 1
+
     return mask
 
 
@@ -26,8 +35,8 @@ def mask_to_tensor(mask):
     d = np.unique(mask)
     mask = cv2.resize(mask, (512, 512), interpolation=cv2.INTER_NEAREST)
 
-    tensor = np.zeros((9, mask.shape[0], mask.shape[1]), np.float32)
-    for idx, n in enumerate(d[1:]):
+    tensor = np.zeros((10, mask.shape[0], mask.shape[1]), np.float32)
+    for idx, n in enumerate(d):
         x, y = np.where(mask == n)
         tensor[idx, x, y] = 1
 

@@ -11,14 +11,51 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils.f_utils import save_obj
 from testing.plot_tables import plot_table
+from testing.plot_tables_no_back import plot_table as plot_no_back
 import re
 
 data_path = "/home/nonari/Documentos/tfgdata/tfgoct/"
-models_path = "/home/nonari/Descargas/"
+models_path = "/home/nonari/Descargas/models_10c/"
 info_data = ""
 
 
 def test(net, img_tensor, lab_tensor):
+    net.eval()
+
+    pred = net(img_tensor)
+    criterion = nn.BCEWithLogitsLoss()
+
+    loss = criterion(pred, lab_tensor)
+    #print("Test/Loss:", loss.item())
+
+    actual_label = t_utils.tensor_to_mask(lab_tensor).flatten()
+    pred_label = t_utils.prediction_to_mask(pred).flatten()
+
+    mask = t_utils.prediction_to_mask(pred)
+
+    jaccard = metrics.jaccard_score(actual_label, pred_label, average=None)
+    recall = metrics.recall_score(actual_label, pred_label, average=None, zero_division=1)
+    f1 = metrics.f1_score(actual_label, pred_label, average=None)
+    confusion = metrics.confusion_matrix(actual_label, pred_label)
+    if confusion.shape[0] == 10:
+        confusion = np.hstack((confusion, np.zeros(10)[:, np.newaxis]))
+        confusion = np.vstack((confusion, np.zeros(11)))
+        confusion[10, 10] = 1
+        jaccard = np.append(jaccard, 1)
+        recall = np.append(recall, 1)
+        f1 = np.append(f1, 1)
+
+    total_by_class = np.sum(confusion, axis=1)
+    if total_by_class[10] == 0:
+        confusion[10, 10] = 1
+        total_by_class[10] = 1
+    total_by_class = total_by_class[:, np.newaxis]
+    confusion = confusion / total_by_class
+
+    return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "f1": f1, "confusion": confusion, "mask": mask}
+
+
+def test_no_back(net, img_tensor, lab_tensor):
     net.eval()
 
     pred = net(img_tensor)
@@ -73,7 +110,7 @@ if __name__ == "__main__":
             encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_weights="imagenet",  # use `imagenet` pretreined weights for encoder initialization
             in_channels=1,  # model input channels (1 for grayscale images, 3 for RGB, etc.)
-            classes=9,  # model output channels (number of classes in your dataset)
+            classes=10,  # model output channels (number of classes in your dataset)
         )
         net.load_state_dict(torch.load(model, map_location=device))
 
