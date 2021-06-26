@@ -32,7 +32,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             image = image.to(device=device, dtype=torch.float32)
             label = label.to(device=device, dtype=torch.float32)
             pred = net(image)
-            mask_pred = np.argmax(pred.detach().numpy(), axis=1)
+            mask_pred = np.argmax(pred.data.cpu().numpy(), axis=1)
             mask_label = t_utils.tensor_to_ml_mask(label)
             accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
             loss = criterion(pred, label)
