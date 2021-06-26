@@ -54,3 +54,12 @@ def tensor_to_mask(tensor):
     mask = torch.sum(tensor, 2)
 
     return mask.numpy()
+
+
+def tensor_to_ml_mask(tensor):
+    v = np.arange(tensor.shape[1]) + 1
+
+    tensor = tensor * v.reshape((1, 10, 1, 1))
+    mask = torch.sum(tensor, 1) - 1
+
+    return mask.numpy()

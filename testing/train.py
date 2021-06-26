@@ -4,13 +4,17 @@ import torch.nn as nn
 import torch
 from utils.f_utils import save_line
 import segmentation_models_pytorch as smp
+from utils import t_utils
+from sklearn import metrics
+import numpy as np
 
-data_path = "/home/nonari/Documentos/tfgdata/tfgoct"
-loss_data_path = ""
-model_data_path = ""
+data_path = "/content/tfgoct/"
+loss_data_path = "/mydrive/FIC/TFG/train_unet_final/loss/"
+accuracy_data_path = "/mydrive/FIC/TFG/train_unet_final/accuracy/"
+model_data_path = "/mydrive/FIC/TFG/train_unet_final/models/"
 
 
-def train_net(net, device, isbi_dataset, epochs=200, batch_size=9, lr=0.00001):
+def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
     train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
                                                batch_size=batch_size,
                                                shuffle=True)
@@ -28,10 +32,13 @@ def train_net(net, device, isbi_dataset, epochs=200, batch_size=9, lr=0.00001):
             image = image.to(device=device, dtype=torch.float32)
             label = label.to(device=device, dtype=torch.float32)
             pred = net(image)
+            mask_pred = np.argmax(pred.detach().numpy(), axis=1)
+            mask_label = t_utils.tensor_to_ml_mask(label)
+            accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
             loss = criterion(pred, label)
             print('Loss/train', loss.item())
             save_line((loss.item(), epoch), f"{loss_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
-
+            save_line((accuracy, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
             if loss < best_loss:
                 best_loss = loss
                 torch.save(net.state_dict(), f'{model_data_path}best_model_p{isbi_dataset.patient_left}.pth')
@@ -47,7 +54,7 @@ if __name__ == "__main__":
             encoder_name="resnet34",
             encoder_weights="imagenet",
             in_channels=1,
-            classes=9,
+            classes=10,
         )
 
         net.to(device=device)
