@@ -37,6 +37,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
             loss = criterion(pred, label)
             print('Loss/train', loss.item())
+            print('Accuracy', accuracy)
             save_line((loss.item(), epoch), f"{loss_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
             save_line((accuracy, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
             if loss < best_loss:
@@ -49,7 +50,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
 
 def tt():
     for i in range(0, 10):
-        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name="resnet34",
             encoder_weights="imagenet",
