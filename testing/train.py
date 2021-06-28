@@ -9,9 +9,9 @@ from sklearn import metrics
 import numpy as np
 
 data_path = "/content/tfgoct/"
-loss_data_path = "/mydrive/FIC/TFG/train_unet_final/pretrained/loss/"
-accuracy_data_path = "/mydrive/FIC/TFG/train_unet_final/pretrained/accuracy/"
-model_data_path = "/mydrive/FIC/TFG/train_unet_final/pretrained/models/"
+loss_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/loss/"
+accuracy_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/accuracy/"
+model_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/models/"
 
 
 def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
