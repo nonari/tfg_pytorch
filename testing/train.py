@@ -49,7 +49,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
 
 
 def tt():
-    for i in range(9, 10):
+    for i in range(0, 10):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name="resnet34",
