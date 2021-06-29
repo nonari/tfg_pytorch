@@ -4,7 +4,7 @@ def print_header():
 
 def print_confusion_header():
     print("Confusion matrix")
-    print("            Back   1       2       3       4       5       6       7       8       Fluid")
+    print("            0      1       2       3       4       5       6       7       8       Fluid")
 
 
 def print_patient(n, loss):
@@ -14,8 +14,6 @@ def print_patient(n, loss):
 
 def print_data_line(class_n, data, padding=10, skip=False):
     clss = f"Layer {class_n}: "
-    if class_n == 0:
-        clss = "Back:"
     if class_n == 10:
         clss = "Fluid:"
     print(clss.ljust(10), end="")
@@ -36,10 +34,10 @@ def plot_table(patient, data):
 
     print_patient(patient, loss)
     print_header()
-    for i in range(11):
+    for i in range(10):
         print_data_line(i, [f1[i], recall[i], jaccard[i]])
 
     print()
     print_confusion_header()
-    for i in range(11):
+    for i in range(10):
         print_data_line(i, confusion[:, i], padding=8)

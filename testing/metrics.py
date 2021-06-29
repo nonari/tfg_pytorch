@@ -65,13 +65,14 @@ def test_no_back(net, img_tensor, lab_tensor):
     #print("Test/Loss:", loss.item())
 
     actual_label = t_utils.tensor_to_mask(lab_tensor).flatten()
-    pred_label = t_utils.prediction_to_mask(pred).flatten()
+    pred_label = t_utils.prediction_to_mask_x(pred).flatten()
 
-    mask = t_utils.prediction_to_mask(pred)
+    mask = t_utils.prediction_to_mask_x(pred)
 
     jaccard = metrics.jaccard_score(actual_label, pred_label, average=None)
     recall = metrics.recall_score(actual_label, pred_label, average=None, zero_division=1)
     f1 = metrics.f1_score(actual_label, pred_label, average=None)
+    specificity = m_utils.specificity(actual_label, pred_label, 10)
     confusion = metrics.confusion_matrix(actual_label, pred_label)
     if confusion.shape[0] == 9:
         confusion = np.hstack((confusion, np.zeros(9)[:, np.newaxis]))
@@ -87,8 +88,10 @@ def test_no_back(net, img_tensor, lab_tensor):
         total_by_class[9] = 1
     total_by_class = total_by_class[:, np.newaxis]
     confusion = confusion / total_by_class
+    accuracy = confusion.diagonal()
 
-    return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "f1": f1, "confusion": confusion, "mask": mask}
+    return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "specificity": specificity, "accuracy": accuracy,
+            "f1": f1, "confusion": confusion, "mask": mask}
 
 
 if __name__ == "__main__":
@@ -118,7 +121,7 @@ if __name__ == "__main__":
         for img_tensor, lab_tensor, filename in train_loader:
             img_tensor = img_tensor.to(device=device, dtype=torch.float32)
             lab_tensor = lab_tensor.to(device=device, dtype=torch.float32)
-            results = test(net, img_tensor, lab_tensor)
+            results = test_no_back(net, img_tensor, lab_tensor)
             patient_results.append(results)
             mask = results["mask"]
             filename = filename[0].replace("img", "seg")
