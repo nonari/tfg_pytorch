@@ -34,3 +34,22 @@ def specificity(true, prediction, classes=10):
         l.append(sp)
 
     return l
+
+
+def accuracy(true, prediction, classes=10):
+    l = []
+    for i in range(1, classes+1):
+        true_copy = true.copy()
+        pred_copy = prediction.copy()
+        true_copy[true_copy != i] = 0
+        pred_copy[pred_copy != i] = 0
+        acc = metrics.accuracy_score(true_copy, pred_copy)
+        # stat = metrics.confusion_matrix(true_copy, pred_copy).ravel()
+        # if len(stat) > 1:
+        #     tn, fp, fn, tp = stat
+        #     sp = (tp + tn) / (tp + tn + fp + fn)
+        # else:
+        #     sp = 1
+        l.append(acc)
+
+    return l

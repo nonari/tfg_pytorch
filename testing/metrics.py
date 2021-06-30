@@ -88,7 +88,7 @@ def test_no_back(net, img_tensor, lab_tensor):
         total_by_class[9] = 1
     total_by_class = total_by_class[:, np.newaxis]
     confusion = confusion / total_by_class
-    accuracy = confusion.diagonal()
+    accuracy = m_utils.accuracy(actual_label, pred_label)
 
     return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "specificity": specificity, "accuracy": accuracy,
             "f1": f1, "confusion": confusion, "mask": mask}

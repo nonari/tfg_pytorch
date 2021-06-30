@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch
 from utils.f_utils import save_line
 import segmentation_models_pytorch as smp
-from utils import t_utils
+from utils import t_utils, m_utils
 from sklearn import metrics
 import numpy as np
 
@@ -12,6 +12,20 @@ data_path = "/content/tfgoct/"
 loss_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/loss/"
 accuracy_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/accuracy/"
 model_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/models/"
+
+
+
+def split_acc(tensor_true, tensor_pred):
+    all_l = []
+    for i in range(0, tensor_true.shape[0]):
+        l = m_utils.accuracy(tensor_true[i].flatten()+1, tensor_pred[i].flatten()+1)
+        all_l.append(l)
+    res = []
+    for t in zip(*tuple(all_l)):
+        avg_l = sum(t) / len(t)
+        res.append(avg_l)
+
+    return res
 
 
 def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
@@ -35,11 +49,12 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             mask_label = t_utils.tensor_to_ml_mask(label)
             label = label.to(device=device, dtype=torch.float32)
             accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
+            accuracy_layers = split_acc(mask_pred, mask_label)
             loss = criterion(pred, label)
             print('Loss/train', loss.item())
             print('Accuracy', accuracy)
             save_line((loss.item(), epoch), f"{loss_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
-            save_line((accuracy, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
+            save_line((accuracy, accuracy_layers, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
             if loss < best_loss:
                 best_loss = loss
                 torch.save(net.state_dict(), f'{model_data_path}best_model_p{isbi_dataset.patient_left}.pth')
