@@ -15,7 +15,7 @@ from testing.plot_tables_no_back import plot_table as plot_no_back
 import re
 
 data_path = "/home/nonari/Documentos/tfgdata/tfgoct/"
-models_path = "/home/nonari/Descargas/models_10c/"
+models_path = "/home/nonari/Descargas/no_pretrained/models/"
 info_data = ""
 
 
@@ -63,7 +63,10 @@ def test_no_back(net, img_tensor, lab_tensor):
 
     loss = criterion(pred, lab_tensor)
     #print("Test/Loss:", loss.item())
-
+    losses = []
+    for i in range(0, 10):
+        lss = criterion(pred[0, i], lab_tensor[0, i])
+        losses.append(lss.item())
     actual_label = t_utils.tensor_to_mask(lab_tensor).flatten()
     pred_label = t_utils.prediction_to_mask_x(pred).flatten()
 
@@ -90,7 +93,7 @@ def test_no_back(net, img_tensor, lab_tensor):
     confusion = confusion / total_by_class
     accuracy = m_utils.accuracy(actual_label, pred_label)
 
-    return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "specificity": specificity, "accuracy": accuracy,
+    return {"loss": losses, "jaccard": jaccard, "recall": recall, "specificity": specificity, "accuracy": accuracy,
             "f1": f1, "confusion": confusion, "mask": mask}
 
 
@@ -111,7 +114,7 @@ if __name__ == "__main__":
         device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights="imagenet",  # use `imagenet` pretreined weights for encoder initialization
+            encoder_weights=None,  # use `imagenet` pretreined weights for encoder initialization
             in_channels=1,  # model input channels (1 for grayscale images, 3 for RGB, etc.)
             classes=10,  # model output channels (number of classes in your dataset)
         )
@@ -134,4 +137,5 @@ if __name__ == "__main__":
         del device
 
     all_avg = m_utils.average_metrics(patients_avgs)
-    plot_table("ALL", all_avg)
+    all_std = m_utils.stdev_metrics(patients_avgs)
+    plot_table("ALL", all_avg, std=all_std)
