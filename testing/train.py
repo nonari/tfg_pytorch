@@ -49,12 +49,12 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             mask_label = t_utils.tensor_to_ml_mask(label)
             label = label.to(device=device, dtype=torch.float32)
             accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
-            accuracy_layers = split_acc(mask_pred, mask_label)
+            #accuracy_layers = split_acc(mask_pred, mask_label)
             loss = criterion(pred, label)
             print('Loss/train', loss.item())
             print('Accuracy', accuracy)
             save_line((loss.item(), epoch), f"{loss_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
-            save_line((accuracy, accuracy_layers, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
+            save_line((accuracy, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
             if loss < best_loss:
                 best_loss = loss
                 torch.save(net.state_dict(), f'{model_data_path}best_model_p{isbi_dataset.patient_left}.pth')
@@ -75,7 +75,7 @@ def tt():
 
         net.to(device=device)
 
-        isbi_dataset = ISBI_Loader(data_path, i)
+        isbi_dataset = ISBI_Loader(data_path, i, augment=True)
         train_net(net, device, isbi_dataset)
         del device
         del net

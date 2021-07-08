@@ -128,7 +128,7 @@ if __name__ == "__main__":
             patient_results.append(results)
             mask = results["mask"]
             filename = filename[0].replace("img", "seg")
-            plt.imsave(f"/home/nonari/Documentos/tfgdata/test_result_mask/{filename}", mask)
+            #plt.imsave(f"/home/nonari/Documentos/tfgdata/test_result_mask/{filename}", mask)
 
         avg_patient_results = m_utils.average_metrics(patient_results)
         patients_avgs.append(avg_patient_results)

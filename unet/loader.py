@@ -3,6 +3,7 @@ import cv2
 import os
 import glob
 from torchvision import transforms
+import torchvision.transforms.functional as F
 from torch.utils.data import Dataset
 import torch
 import random
@@ -13,8 +14,9 @@ from PIL import Image
 
 
 def im_to_tensor(im):
-    d = np.unique(im)
-
+    d = np.unique(im).tolist()
+    if 0 in d:
+        d.remove(0)
     l = []
     for idx, n in enumerate(d):
         i = np.where(im == n)
@@ -41,11 +43,28 @@ im_trans = transforms.Compose([
     transforms.Resize((512, 512), Image.BILINEAR)
 ])
 
+
+def augment(im, mask):
+    im = transforms.ToTensor()(im)
+    mask = transforms.ToTensor()(mask)
+    i, j, h, w = transforms.RandomCrop.get_params(im, (486, 492))
+    im = F.crop(im, i, j, h, w)
+    mask = F.crop(mask, i, j, h, w)
+
+    ang = transforms.RandomRotation.get_params([-5, 5])
+    im = F.rotate(im, ang)
+    mask = F.rotate(mask, ang)
+    im = transforms.ToPILImage()(im)
+    mask = transforms.ToPILImage()(mask)
+    return im, mask
+
+
 class ISBI_Loader(Dataset):
-    def __init__(self, data_path, patient_left=0):
+    def __init__(self, data_path, patient_left=0, augment=False):
         # Initialization function, read all the pictures under data_path
         self.data_path = data_path
         self.patient_left = patient_left
+        self.augment = augment
         discard = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
         self.imgs_path = glob.glob(os.path.join(data_path, f'img_*'))
         for path in discard:
@@ -62,6 +81,11 @@ class ISBI_Loader(Dataset):
         # Convert the data to a single channel picture
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
+
+        label += 1
+        if self.augment:
+            image, label = augment(image, label)
+            label = torch.squeeze(transforms.ToTensor()(label))
 
         image = im_trans(image)
         # Process the label, change the pixel value of 255 to 1
