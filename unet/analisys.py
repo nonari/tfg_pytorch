@@ -1,7 +1,9 @@
 import glob
 import os
 import ast
+from statistics import stdev
 from matplotlib import pyplot
+import numpy as np
 data_path_acc = "/home/nonari/Descargas/no_pretrained/accuracy"
 data_path_loss = "/home/nonari/Descargas/no_pretrained/loss"
 
@@ -11,7 +13,15 @@ def avg(arr):
     for i in zip(*tuple(arr)):
         avg = sum(i) / len(i)
         l.append(avg)
-    return l
+    return np.array(l)
+
+
+def dev(arr):
+    l = []
+    for i in zip(*tuple(arr)):
+        std = stdev(i)
+        l.append(std)
+    return np.array(l)
 
 
 def extract(test_files):
@@ -51,12 +61,16 @@ loss_train_all, epoch_acc_train_all = extract(test_files_loss)
 # pyplot.show()
 
 acc = avg(acc_train_all)
+acc_stdev = dev(acc_train_all)
 loss = avg(loss_train_all)
+loss_stdev = dev(loss_train_all)
 
 pyplot.plot(epoch_acc_train_all[0], acc)
+pyplot.fill_between(epoch_acc_train_all[0], acc-acc_stdev, acc + acc_stdev, alpha=0.5)
 pyplot.title("NP AVG accuracy")
 pyplot.show()
 
 pyplot.plot(epoch_acc_train_all[0], loss)
+pyplot.fill_between(epoch_acc_train_all[0], loss-loss_stdev, loss + loss_stdev, alpha=0.5)
 pyplot.title("NP AVG Loss")
 pyplot.show()
