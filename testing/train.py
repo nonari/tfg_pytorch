@@ -47,6 +47,8 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             pred = net(image)
             mask_pred = np.argmax(pred.data.cpu().numpy(), axis=1)
             mask_label = t_utils.tensor_to_ml_mask(label)
+            void_pos = np.where(mask_label == -1)
+            mask_pred[void_pos] = -1
             label = label.to(device=device, dtype=torch.float32)
             accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
             #accuracy_layers = split_acc(mask_pred, mask_label)
@@ -65,7 +67,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
 
 def tt():
     for i in range(0, 10):
-        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('gpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name="resnet34",
             encoder_weights="imagenet",
@@ -75,7 +77,7 @@ def tt():
 
         net.to(device=device)
 
-        isbi_dataset = ISBI_Loader(data_path, i, augment=True)
+        isbi_dataset = ISBI_Loader(data_path, i, augment=False)
         train_net(net, device, isbi_dataset)
         del device
         del net
