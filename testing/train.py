@@ -8,7 +8,7 @@ from utils import t_utils, m_utils
 from sklearn import metrics
 import numpy as np
 
-data_path = "/content/tfgoct/"
+data_path = "/home/nonari/Documentos/tfgdata/tfgoct/"
 loss_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/loss/"
 accuracy_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/accuracy/"
 model_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/models/"
@@ -65,7 +65,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
 
 def tt():
     for i in range(0, 10):
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name="resnet34",
             encoder_weights="imagenet",

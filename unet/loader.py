@@ -15,8 +15,6 @@ from PIL import Image
 
 def im_to_tensor(im):
     d = np.unique(im).tolist()
-    if 0 in d:
-        d.remove(0)
     l = []
     for idx, n in enumerate(d):
         i = np.where(im == n)
@@ -46,17 +44,19 @@ im_trans = transforms.Compose([
 
 def augment(im, mask):
     im = transforms.ToTensor()(im)
-    mask = transforms.ToTensor()(mask)
-    i, j, h, w = transforms.RandomCrop.get_params(im, (486, 492))
-    im = F.crop(im, i, j, h, w)
-    mask = F.crop(mask, i, j, h, w)
+    i, j, h, w = transforms.RandomResizedCrop.get_params(im, [0.95, 1], [1, 1])
+    im = F.resized_crop(im, i, j, h, w, [512, 512], interpolation=Image.BILINEAR)
+    mask = F.resized_crop(mask, i, j, h, w, [512, 512], interpolation=Image.NEAREST)
 
     ang = transforms.RandomRotation.get_params([-5, 5])
-    im = F.rotate(im, ang)
-    mask = F.rotate(mask, ang)
-    im = transforms.ToPILImage()(im)
-    mask = transforms.ToPILImage()(mask)
-    return im, mask
+    im = F.rotate(im, ang, interpolation=Image.BILINEAR)
+    mask = F.rotate(mask, ang, interpolation=Image.NEAREST)
+
+    if torch.rand(1) < 0.4:
+        im = F.hflip(im)
+        mask = F.hflip(mask)
+
+    return torch.squeeze(im).numpy(), mask
 
 
 class ISBI_Loader(Dataset):
@@ -82,14 +82,14 @@ class ISBI_Loader(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
 
-        label += 1
-        if self.augment:
+        label = im_to_tensor(label)
+
+        if self.augment and random.random() > 0.5:
             image, label = augment(image, label)
-            label = torch.squeeze(transforms.ToTensor()(label))
 
         image = im_trans(image)
-        # Process the label, change the pixel value of 255 to 1
-        return image, im_to_tensor(label)
+
+        return image, label
 
     def __len__(self):
         # Return the training set size

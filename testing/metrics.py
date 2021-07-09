@@ -15,7 +15,7 @@ from testing.plot_tables_no_back import plot_table as plot_no_back
 import re
 
 data_path = "/home/nonari/Documentos/tfgdata/tfgoct/"
-models_path = "/home/nonari/Descargas/no_pretrained/models/"
+models_path = "/home/nonari/Descargas/"
 info_data = ""
 
 
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights=None,  # use `imagenet` pretreined weights for encoder initialization
+            encoder_weights="imagenet",  # use `imagenet` pretreined weights for encoder initialization
             in_channels=1,  # model input channels (1 for grayscale images, 3 for RGB, etc.)
             classes=10,  # model output channels (number of classes in your dataset)
         )
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             patient_results.append(results)
             mask = results["mask"]
             filename = filename[0].replace("img", "seg")
-            #plt.imsave(f"/home/nonari/Documentos/tfgdata/test_result_mask/{filename}", mask)
+            plt.imsave(f"/home/nonari/Documentos/tfgdata/test_result_mask/{filename}", mask)
 
         avg_patient_results = m_utils.average_metrics(patient_results)
         patients_avgs.append(avg_patient_results)
