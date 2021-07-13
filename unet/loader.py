@@ -44,7 +44,7 @@ im_trans = transforms.Compose([
 
 def augment(im, mask):
     im = transforms.ToTensor()(im)
-    i, j, h, w = transforms.RandomResizedCrop.get_params(im, [0.95, 1], [1, 1])
+    i, j, h, w = transforms.RandomResizedCrop.get_params(im, [0.95, 1.0], [1.0, 1.0])
     im = F.resized_crop(im, i, j, h, w, [512, 512], interpolation=Image.BILINEAR)
     mask = F.resized_crop(mask, i, j, h, w, [512, 512], interpolation=Image.NEAREST)
 
