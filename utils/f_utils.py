@@ -30,3 +30,17 @@ def save_obj(data, name):
     with open(name, append_write) as file:
         file.write(f'{data}\n')
     file.close()
+
+
+def create_dir(path):
+    if not os.path.isdir(path):
+        if os.path.exists(path):
+            raise FileExistsError
+        else:
+            os.makedirs(path, exist_ok=True)
+
+
+def create_skel(path):
+    create_dir(os.path.join(path, 'models'))
+    create_dir(os.path.join(path, 'accuracy'))
+    create_dir(os.path.join(path, 'loss'))

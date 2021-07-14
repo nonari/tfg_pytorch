@@ -4,15 +4,11 @@ import torch.nn as nn
 import torch
 from utils.f_utils import save_line
 import segmentation_models_pytorch as smp
-from utils import t_utils, m_utils
+from utils import t_utils, m_utils, f_utils
 from sklearn import metrics
 import numpy as np
-
-data_path = "/home/nonari/Documentos/tfgdata/tfgoct/"
-loss_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/loss/"
-accuracy_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/accuracy/"
-model_data_path = "/mydrive/FIC/TFG/train_unet_final/no_pretrained/models/"
-
+import utils.config as args
+import os
 
 
 def split_acc(tensor_true, tensor_pred):
@@ -28,7 +24,7 @@ def split_acc(tensor_true, tensor_pred):
     return res
 
 
-def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
+def train_net(net, device, isbi_dataset, epochs=0, batch_size=9, lr=0.00001):
     train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
                                                batch_size=batch_size,
                                                shuffle=True)
@@ -55,29 +51,36 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             loss = criterion(pred, label)
             print('Loss/train', loss.item())
             print('Accuracy', accuracy)
-            save_line((loss.item(), epoch), f"{loss_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
-            save_line((accuracy, epoch), f"{accuracy_data_path}train_unet_p{isbi_dataset.patient_left}.txt")
+            savedir = args.get()['save_data_dir']
+            data_file = f'train_unet_p{isbi_dataset.patient_left}.txt'
+            save_line((loss.item(), epoch), os.path.join(savedir, "loss", data_file))
+            save_line((accuracy, epoch), os.path.join(savedir, "accuracy", data_file))
             if loss < best_loss:
                 best_loss = loss
-                torch.save(net.state_dict(), f'{model_data_path}best_model_p{isbi_dataset.patient_left}.pth')
+                model_file = f"best_model_p{isbi_dataset.patient_left}.pth"
+                torch.save(net.state_dict(), os.path.join(savedir, "models", model_file))
 
             loss.backward()
             optimizer.step()
 
 
 def tt():
+    encoder = args.get()['encoder']
+    pretraining = "imagenet" if args.get()['use_imagenet'] else None
+    f_utils.create_skel(args.get()["save_data_dir"])
     for i in range(0, 10):
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
-            encoder_name="resnet34",
-            encoder_weights="imagenet",
+            encoder_name=encoder,
+            encoder_weights=pretraining,
             in_channels=1,
             classes=10,
         )
 
         net.to(device=device)
-
-        isbi_dataset = ISBI_Loader(data_path, i, augment=False)
+        augment = args.get()['augment']
+        save_dir = args.get()['train_data_dir']
+        isbi_dataset = ISBI_Loader(save_dir, i, augment=augment)
         train_net(net, device, isbi_dataset)
         del device
         del net
