@@ -24,7 +24,7 @@ def split_acc(tensor_true, tensor_pred):
     return res
 
 
-def train_net(net, device, isbi_dataset, epochs=0, batch_size=9, lr=0.00001):
+def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
     train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
                                                batch_size=batch_size,
                                                shuffle=True)
