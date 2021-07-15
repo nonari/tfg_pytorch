@@ -1,3 +1,8 @@
+from testing import config
+import sys
+from os import path
+
+
 layers = ["HV", "NFL", "GCL-IPL", "INL", "OPL", "OPL-ISM", "ISE", "OS-RPE", "XX", "Fluid"]
 
 def print_header():
@@ -33,7 +38,7 @@ def plot_table(patient, data, std=None):
     loss = data["loss"]
     confusion = data["confusion"]
 
-
+    sys.stdout = open(path.join(config.save_data_dir, "results.txt"), 'a')
     print_patient(patient)
     print_header()
     for i in range(10):
@@ -60,3 +65,5 @@ def plot_table(patient, data, std=None):
     print_confusion_header()
     for i in range(10):
         print_data_line(i, confusion[:, i], padding=8)
+
+    sys.stdout.close()

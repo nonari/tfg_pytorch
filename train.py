@@ -1,6 +1,6 @@
-from testing.train import tt
+from training.train import tt
 import argparse
-from utils.config import set_data
+from training.config import set_data
 
 
 def args():

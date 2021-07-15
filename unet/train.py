@@ -1,10 +1,8 @@
-from unet.model import UNet
-from unet.loader import ISBI_Loader, Test_Loader
+from unet.loader import ISBI_Loader
 from torch import optim
 import torch.nn as nn
 import torch
 import segmentation_models_pytorch as smp
-import utils.config as args
 import os
 
 

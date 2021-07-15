@@ -9,14 +9,11 @@ import os
 from utils import m_utils
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.f_utils import save_obj
 from testing.plot_tables import plot_table
-from testing.plot_tables_no_back import plot_table as plot_no_back
 import re
-
-data_path = "/home/nonari/Documentos/tfgdata/tfgoct/"
-models_path = "/home/nonari/Descargas/"
-info_data = ""
+from os import path
+from testing import config
+from utils import f_utils
 
 
 def test(net, img_tensor, lab_tensor):
@@ -61,7 +58,7 @@ def test_no_back(net, img_tensor, lab_tensor):
     pred = net(img_tensor)
     criterion = nn.BCEWithLogitsLoss()
 
-    loss = criterion(pred, lab_tensor)
+    # loss = criterion(pred, lab_tensor)
     #print("Test/Loss:", loss.item())
     losses = []
     for i in range(0, 10):
@@ -97,26 +94,26 @@ def test_no_back(net, img_tensor, lab_tensor):
             "f1": f1, "confusion": confusion, "mask": mask}
 
 
-if __name__ == "__main__":
+def ts():
     test_results_acc = []
-
-    models = glob.glob(os.path.join(models_path, f'best_model_p*'))
+    f_utils.create_dir(config.save_data_dir)
+    models = glob.glob(os.path.join(config.models_dir, f'best_model_p*'))
     models = sorted(models)
 
     patients_avgs = []
     for idx, model in enumerate(models):
         m = re.search('best_model_p(\d+)\.pth', model)
         idx = m.group(1)
-        isbi_dataset = Test_Loader(data_path, idx)
+        isbi_dataset = Test_Loader(config.test_images_dir, idx)
         train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
                                                    batch_size=1,
                                                    shuffle=False)
         device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
-            encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights="imagenet",  # use `imagenet` pretreined weights for encoder initialization
-            in_channels=1,  # model input channels (1 for grayscale images, 3 for RGB, etc.)
-            classes=10,  # model output channels (number of classes in your dataset)
+            encoder_name=config.encoder,
+            encoder_weights=None,
+            in_channels=1,
+            classes=10,
         )
         net.load_state_dict(torch.load(model, map_location=device))
 
@@ -128,7 +125,8 @@ if __name__ == "__main__":
             patient_results.append(results)
             mask = results["mask"]
             filename = filename[0].replace("img", "seg")
-            plt.imsave(f"/home/nonari/Documentos/tfgdata/test_result_mask/{filename}", mask)
+            mask_path = path.join(config.save_data_dir, filename)
+            plt.imsave(mask_path, mask)
 
         avg_patient_results = m_utils.average_metrics(patient_results)
         patients_avgs.append(avg_patient_results)

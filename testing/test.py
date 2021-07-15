@@ -50,5 +50,6 @@ if __name__ == "__main__":
     for img_tensor, _, filename in train_loader:
         img_tensor = img_tensor.to(device=device, dtype=torch.float32)
         mask = test(net, img_tensor)
+
         plt.imsave(f"/home/nonari/Documentos/tfgdata/test_result_mask/{filename}", mask)
 

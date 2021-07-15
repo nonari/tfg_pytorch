@@ -7,7 +7,7 @@ import segmentation_models_pytorch as smp
 from utils import t_utils, m_utils, f_utils
 from sklearn import metrics
 import numpy as np
-import utils.config as config
+import training.config as config
 import os
 
 
