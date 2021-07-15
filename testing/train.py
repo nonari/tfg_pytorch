@@ -7,7 +7,7 @@ import segmentation_models_pytorch as smp
 from utils import t_utils, m_utils, f_utils
 from sklearn import metrics
 import numpy as np
-import utils.config as args
+import utils.config as config
 import os
 
 
@@ -51,25 +51,24 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             loss = criterion(pred, label)
             print('Loss/train', loss.item())
             print('Accuracy', accuracy)
-            savedir = args.get()['save_data_dir']
             data_file = f'train_unet_p{isbi_dataset.patient_left}.txt'
-            save_line((loss.item(), epoch), os.path.join(savedir, "loss", data_file))
-            save_line((accuracy, epoch), os.path.join(savedir, "accuracy", data_file))
+            save_line((loss.item(), epoch), os.path.join(config.save_data_dir, "loss", data_file))
+            save_line((accuracy, epoch), os.path.join(config.save_data_dir, "accuracy", data_file))
             if loss < best_loss:
                 best_loss = loss
                 model_file = f"best_model_p{isbi_dataset.patient_left}.pth"
-                torch.save(net.state_dict(), os.path.join(savedir, "models", model_file))
+                torch.save(net.state_dict(), os.path.join(config.save_data_dir, "models", model_file))
 
             loss.backward()
             optimizer.step()
 
 
 def tt():
-    encoder = args.get()['encoder']
-    pretraining = "imagenet" if args.get()['use_imagenet'] else None
-    f_utils.create_skel(args.get()["save_data_dir"])
-    for i in range(0, 10):
-        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+    encoder = config.encoder
+    pretraining = config.weights
+    f_utils.create_skel(config.save_data_dir)
+    for i in range(config.ini, config.end):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name=encoder,
             encoder_weights=pretraining,
@@ -78,10 +77,8 @@ def tt():
         )
 
         net.to(device=device)
-        augment = args.get()['augment']
-        save_dir = args.get()['train_data_dir']
-        isbi_dataset = ISBI_Loader(save_dir, i, augment=augment)
-        train_net(net, device, isbi_dataset)
+        isbi_dataset = ISBI_Loader(config.train_data_dir, i, augment=config.augment)
+        train_net(net, device, isbi_dataset, epochs=config.epochs, lr=config.lr)
         del device
         del net
         torch.cuda.empty_cache()
