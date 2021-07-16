@@ -14,6 +14,8 @@ def args():
     argument_parser.add_argument('--epochs', type=float, default=175)
     argument_parser.add_argument('--weights', type=str, default=None)
     argument_parser.add_argument('--augment', action="store_true")
+    argument_parser.add_argument('--batch', type=int, default=9)
+    argument_parser.add_argument('--parts', type=int, default=1)
     parsed_args = argument_parser.parse_args()
 
     print(parsed_args)

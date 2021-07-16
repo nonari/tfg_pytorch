@@ -33,12 +33,12 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
     criterion = nn.BCEWithLogitsLoss()
 
     best_loss = float('inf')
-
+    optimizer.zero_grad()
     for epoch in range(epochs):
         net.train()
 
-        for image, label in train_loader:
-            optimizer.zero_grad()
+        loss_total = 0
+        for idx, (image, label) in enumerate(train_loader):
             image = image.to(device=device, dtype=torch.float32)
             pred = net(image)
             mask_pred = np.argmax(pred.data.cpu().numpy(), axis=1)
@@ -49,18 +49,22 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
             #accuracy_layers = split_acc(mask_pred, mask_label)
             loss = criterion(pred, label)
-            print('Loss/train', loss.item())
-            print('Accuracy', accuracy)
-            data_file = f'train_unet_p{isbi_dataset.patient_left}.txt'
-            save_line((loss.item(), epoch), os.path.join(config.save_data_dir, "loss", data_file))
-            save_line((accuracy, epoch), os.path.join(config.save_data_dir, "accuracy", data_file))
-            if loss < best_loss:
-                best_loss = loss
-                model_file = f"best_model_p{isbi_dataset.patient_left}.pth"
-                torch.save(net.state_dict(), os.path.join(config.save_data_dir, "models", model_file))
-
             loss.backward()
-            optimizer.step()
+            loss_total += loss.item()
+            if idx % config.parts == 0:
+                batch_loss = loss_total / config.parts
+                print('Loss/train', loss.item())
+                print('Accuracy', accuracy)
+                data_file = f'train_unet_p{isbi_dataset.patient_left}.txt'
+                save_line((loss.item(), epoch), os.path.join(config.save_data_dir, "loss", data_file))
+                save_line((accuracy, epoch), os.path.join(config.save_data_dir, "accuracy", data_file))
+                if batch_loss <= best_loss:
+                    best_loss = loss_total / config.parts
+                    model_file = f"best_model_p{isbi_dataset.patient_left}.pth"
+                    torch.save(net.state_dict(), os.path.join(config.save_data_dir, "models", model_file))
+                optimizer.step()
+                optimizer.zero_grad()
+
 
 
 def tt():
@@ -68,7 +72,7 @@ def tt():
     pretraining = config.weights
     f_utils.create_skel(config.save_data_dir)
     for i in range(config.ini, config.end):
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name=encoder,
             encoder_weights=pretraining,

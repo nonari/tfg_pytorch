@@ -12,6 +12,8 @@ epochs = None
 lr = None
 ini = None
 end = None
+batch = None
+parts = None
 
 
 def set_data(d):
@@ -21,6 +23,8 @@ def set_data(d):
     setattr(this, "augment", d.augment)
     setattr(this, "encoder", d.encoder)
     setattr(this, "epochs", d.epochs)
+    setattr(this, "batch", d.batch)
+    setattr(this, "parts", d.parts)
     setattr(this, "lr", d.lr)
     setattr(this, "ini", d.ini)
     setattr(this, "end", d.end)
