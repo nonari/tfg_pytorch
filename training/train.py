@@ -53,7 +53,7 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
             loss = criterion(pred, label)
             loss.backward()
             loss_total += loss.item()
-            if idx % config.parts == 0:
+            if (idx + 1) % config.parts == 0:
                 batch_loss = loss_total / config.parts
                 batch_acc = acc_total / config.parts
                 print('Loss/train', batch_loss)
@@ -85,7 +85,7 @@ def tt():
 
         net.to(device=device)
         isbi_dataset = ISBI_Loader(config.train_data_dir, i, augment=config.augment)
-        train_net(net, device, isbi_dataset, epochs=config.epochs, lr=config.lr)
+        train_net(net, device, isbi_dataset, epochs=config.epochs, batch_size=config.batch, lr=config.lr)
         del device
         del net
         torch.cuda.empty_cache()
