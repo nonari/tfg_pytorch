@@ -67,6 +67,8 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
                     torch.save(net.state_dict(), os.path.join(config.save_data_dir, "models", model_file))
                 optimizer.step()
                 optimizer.zero_grad()
+                loss_total = 0
+                acc_total = 0
 
 
 
