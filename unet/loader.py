@@ -49,8 +49,8 @@ def augment(im, mask):
     mask = F.resized_crop(mask, i, j, h, w, [512, 512], interpolation=Image.NEAREST)
 
     ang = transforms.RandomRotation.get_params([-5, 5])
-    im = F.rotate(im, ang, interpolation=Image.BILINEAR)
-    mask = F.rotate(mask, ang, interpolation=Image.NEAREST)
+    im = F.rotate(im, ang, resample=Image.BILINEAR)
+    mask = F.rotate(mask, ang, resample=Image.NEAREST)
 
     if torch.rand(1) < 0.4:
         im = F.hflip(im)
