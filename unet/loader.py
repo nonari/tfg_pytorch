@@ -35,6 +35,13 @@ def im_to_tensor(im):
     return tensor
 
 
+def im_to_3dtensor(im):
+    t = transforms.ToPILImage()(im)
+    t = transforms.Resize((512, 512), Image.NEAREST)(t)
+    tensor = transforms.ToTensor()(t)
+    return tensor.long()
+
+
 im_trans = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.5], [0.5]),
@@ -82,14 +89,14 @@ class ISBI_Loader(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
 
-        label = im_to_tensor(label)
+        label = im_to_3dtensor(label)
 
         if self.augment and random.random() > 0.5:
             image, label = augment(image, label)
 
         image = im_trans(image)
 
-        return image, label
+        return image.long(), label
 
     def __len__(self):
         # Return the training set size

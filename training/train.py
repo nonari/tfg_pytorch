@@ -71,6 +71,54 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
                 acc_total = 0
 
 
+def train_netCRL(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
+    train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
+                                               batch_size=batch_size,
+                                               shuffle=True)
+
+    optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
+    criterion = nn.CrossEntropyLoss()
+
+    best_loss = float('inf')
+    optimizer.zero_grad()
+    for epoch in range(epochs):
+        net.train()
+
+        acc_total = 0
+        loss_total = 0
+        for idx, (image, label) in enumerate(train_loader):
+            image = image.to(device=device, dtype=torch.float32)
+            pred = net(image)
+            mask_pred = np.argmax(pred.data.cpu().numpy(), axis=1)
+            # mask_label = t_utils.tensor_to_ml_mask(label)
+            # void_pos = np.where(mask_label == -1)
+            # mask_pred[void_pos] = -1
+            label = label.to(device=device, dtype=torch.float32)
+            # accuracy = metrics.accuracy_score(mask_pred.flatten(), mask_label.flatten(), normalize=True)
+            # acc_total += accuracy
+            #accuracy_layers = split_acc(mask_pred, mask_label)
+            label = label.squeeze(1)
+            loss = criterion(pred, label.long())
+            loss.backward()
+            loss_total += loss.item()
+            if (idx + 1) % config.parts == 0:
+                batch_loss = loss_total / config.parts
+                batch_acc = acc_total / config.parts
+                print('Loss/train', batch_loss)
+                print('Accuracy', batch_acc)
+                data_file = f'train_unet_p{isbi_dataset.patient_left}.txt'
+                save_line((batch_loss, epoch), os.path.join(config.save_data_dir, "loss", data_file))
+                save_line((batch_acc, epoch), os.path.join(config.save_data_dir, "accuracy", data_file))
+                if batch_loss <= best_loss:
+                    best_loss = batch_loss
+                    model_file = f"best_model_p{isbi_dataset.patient_left}.pth"
+                    torch.save(net.state_dict(), os.path.join(config.save_data_dir, "models", model_file))
+                optimizer.step()
+                optimizer.zero_grad()
+                loss_total = 0
+                acc_total = 0
+
+
 
 def tt():
     encoder = config.encoder
@@ -87,7 +135,7 @@ def tt():
 
         net.to(device=device)
         isbi_dataset = ISBI_Loader(config.train_data_dir, i, augment=config.augment)
-        train_net(net, device, isbi_dataset, epochs=config.epochs, batch_size=config.batch, lr=config.lr)
+        train_netCRL(net, device, isbi_dataset, epochs=config.epochs, batch_size=config.batch, lr=config.lr)
         del device
         del net
         torch.cuda.empty_cache()

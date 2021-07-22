@@ -48,8 +48,8 @@ def mask_to_tensor(mask):
 
 def tensor_to_mask(tensor):
     tensor = torch.squeeze(tensor, 0)
-    tensor = tensor.swapaxes(0, 2)
-    tensor = tensor.swapaxes(0, 1)
+    tensor = tensor.transpose(0, 2)
+    tensor = tensor.transpose(0, 1)
     v = np.arange(tensor.shape[2]) + 1
     tensor = tensor * v
     mask = torch.sum(tensor, 2)
