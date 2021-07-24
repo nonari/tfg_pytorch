@@ -9,6 +9,7 @@ from sklearn import metrics
 import numpy as np
 import training.config as config
 import os
+from matplotlib import pyplot as plt
 
 
 def split_acc(tensor_true, tensor_pred):
@@ -22,6 +23,11 @@ def split_acc(tensor_true, tensor_pred):
         res.append(avg_l)
 
     return res
+
+
+def plot(im):
+    plt.imshow(im)
+    plt.show()
 
 
 def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
@@ -125,7 +131,7 @@ def tt():
     pretraining = config.weights
     f_utils.create_skel(config.save_data_dir)
     for i in range(config.ini, config.end):
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name=encoder,
             encoder_weights=pretraining,

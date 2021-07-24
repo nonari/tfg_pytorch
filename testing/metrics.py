@@ -51,6 +51,9 @@ def test(net, img_tensor, lab_tensor):
 
     return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "f1": f1, "confusion": confusion, "mask": mask}
 
+def sh(im):
+    plt.imshow(im)
+    plt.show()
 
 def test_no_back(net, img_tensor, lab_tensor):
     net.eval()

@@ -11,6 +11,7 @@ import numpy as np
 import ntpath
 from utils import t_utils
 from PIL import Image
+from matplotlib import pyplot as plt
 
 
 def im_to_tensor(im):
@@ -34,12 +35,17 @@ def im_to_tensor(im):
     tensor = torch.from_numpy(st)
     return tensor
 
+def sh(im):
+    plt.imshow(im)
+    plt.show()
+
 
 def im_to_3dtensor(im):
-    t = transforms.ToPILImage()(im)
-    t = transforms.Resize((512, 512), Image.NEAREST)(t)
-    tensor = transforms.ToTensor()(t)
-    return tensor.long()
+    im = im.astype(np.int32)
+    tensor = transforms.ToTensor()(im)
+    t = transforms.Resize((512, 512), Image.NEAREST)(tensor)
+
+    return t
 
 
 im_trans = transforms.Compose([
