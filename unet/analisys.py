@@ -4,8 +4,9 @@ import ast
 from statistics import stdev
 from matplotlib import pyplot
 import numpy as np
-data_path_acc = "/home/nonari/Descargas/no_pretrained/accuracy"
-data_path_loss = "/home/nonari/Descargas/no_pretrained/loss"
+data_dir = "/home/nonari/Documents/resnet34_cp_sa"
+data_path_acc = f"{data_dir}/accuracy"
+data_path_loss = f"{data_dir}/loss"
 
 
 def avg(arr):

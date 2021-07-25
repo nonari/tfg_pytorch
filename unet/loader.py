@@ -59,6 +59,7 @@ def augment(im, mask):
     im = transforms.ToTensor()(im)
     i, j, h, w = transforms.RandomResizedCrop.get_params(im, [0.95, 1.0], [1.0, 1.0])
     im = F.resized_crop(im, i, j, h, w, [512, 512], interpolation=Image.BILINEAR)
+    mask += 1
     mask = F.resized_crop(mask, i, j, h, w, [512, 512], interpolation=Image.NEAREST)
 
     ang = transforms.RandomRotation.get_params([-5, 5])
@@ -69,7 +70,7 @@ def augment(im, mask):
         im = F.hflip(im)
         mask = F.hflip(mask)
 
-    return torch.squeeze(im).numpy(), mask
+    return torch.squeeze(im).numpy(), mask - 1
 
 
 class ISBI_Loader(Dataset):

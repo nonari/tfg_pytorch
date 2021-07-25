@@ -83,7 +83,7 @@ def train_netCRL(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001
                                                shuffle=True)
 
     optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(ignore_index=-1)
 
     best_loss = float('inf')
     optimizer.zero_grad()
@@ -131,7 +131,7 @@ def tt():
     pretraining = config.weights
     f_utils.create_skel(config.save_data_dir)
     for i in range(config.ini, config.end):
-        device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         net = smp.Unet(
             encoder_name=encoder,
             encoder_weights=pretraining,
