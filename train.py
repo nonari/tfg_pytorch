@@ -11,7 +11,7 @@ def args():
     argument_parser.add_argument('--ini', type=int, default=0)
     argument_parser.add_argument('--end', type=int, default=10)
     argument_parser.add_argument('--lr', type=float, default=0.00001)
-    argument_parser.add_argument('--epochs', type=float, default=175)
+    argument_parser.add_argument('--epochs', type=int, default=175)
     argument_parser.add_argument('--weights', type=str, default=None)
     argument_parser.add_argument('--augment', action="store_true")
     argument_parser.add_argument('--batch', type=int, default=9)
