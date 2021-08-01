@@ -56,14 +56,14 @@ def test_no_back(net, img_tensor, lab_tensor):
     net.eval()
 
     pred = net(img_tensor)
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
 
     # loss = criterion(pred, lab_tensor)
     #print("Test/Loss:", loss.item())
     losses = []
     for i in range(0, 10):
-        lss = criterion(pred[0, i], lab_tensor[0, i])
-        losses.append(lss.item())
+        #lss = criterion(pred[0, i], lab_tensor[0, i])
+        losses.append(0)
     actual_label = t_utils.tensor_to_mask(lab_tensor).flatten()
     pred_label = t_utils.prediction_to_mask_x(pred).flatten()
 
