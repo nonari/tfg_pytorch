@@ -71,7 +71,6 @@ def train_net(net, device, isbi_dataset, epochs=175, batch_size=9, lr=0.00001):
                 acc_total = 0
 
 
-
 def tt():
     encoder = config.encoder
     pretraining = config.weights
