@@ -9,6 +9,7 @@ import random
 import numpy as np
 import ntpath
 from utils import t_utils
+from PIL import Image
 
 
 def im_to_tensor(im):
@@ -20,12 +21,12 @@ def im_to_tensor(im):
         t = np.zeros((im.shape[0], im.shape[1]), np.float32)
         t[i] = 1
         t = transforms.ToPILImage()(t)
-        t = transforms.Resize((512, 512), transforms.InterpolationMode.NEAREST)(t)
+        t = transforms.Resize((512, 512), Image.NEAREST)(t)
         l.append(t)
     if len(d) == 9:
         t = np.zeros((im.shape[0], im.shape[1]), np.float32)
         t = transforms.ToPILImage()(t)
-        t = transforms.Resize((512, 512), transforms.InterpolationMode.NEAREST)(t)
+        t = transforms.Resize((512, 512), Image.NEAREST)(t)
         l.append(t)
     st = np.dstack(tuple(l))
     st = np.swapaxes(st, 0, 2)
@@ -37,7 +38,7 @@ def im_to_tensor(im):
 im_trans = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.5], [0.5]),
-    transforms.Resize((512, 512), transforms.InterpolationMode.BILINEAR)
+    transforms.Resize((512, 512), Image.BILINEAR)
 ])
 
 

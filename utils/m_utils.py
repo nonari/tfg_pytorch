@@ -45,6 +45,32 @@ def stdev_metrics(scores):
             "jaccard": jaccard, "confusion": confusion}
 
 
+def specificityB(true, prediction):
+    vp = np.logical_and(true, prediction)
+
+    tmp1 = np.logical_not(true)
+    tmp2 = np.logical_not(prediction)
+    vn = np.logical_and(tmp1, tmp2)
+
+    fp = np.logical_xor(prediction, vp)
+
+    tmp = np.logical_not(prediction)
+    fn = np.logical_xor(tmp, vn)
+
+    vp = np.sum(vp, axis=1)
+    fp = np.sum(fp, axis=1)
+    fn = np.sum(fn, axis=1)
+    vn = np.sum(vn, axis=1)
+    vp = np.sum(vp, axis=1)
+    fp = np.sum(fp, axis=1)
+    fn = np.sum(fn, axis=1)
+    vn = np.sum(vn, axis=1)
+
+    s = vn / (vn + fp)
+
+    return s.tolist()
+
+
 def specificity(true, prediction, classes=10):
     l = []
     for i in range(1, classes+1):
