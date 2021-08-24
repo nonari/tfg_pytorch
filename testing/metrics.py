@@ -10,6 +10,7 @@ from utils import m_utils
 import numpy as np
 import matplotlib.pyplot as plt
 from testing.plot_tables import plot_table
+from testing.latex_tables import plot_table as latex
 import re
 from os import path
 from testing import config
@@ -72,7 +73,11 @@ def test_no_back(net, img_tensor, lab_tensor):
     jaccard = metrics.jaccard_score(actual_label, pred_label, average=None)
     recall = metrics.recall_score(actual_label, pred_label, average=None, zero_division=1)
     f1 = metrics.f1_score(actual_label, pred_label, average=None)
-    specificity = m_utils.specificity(actual_label, pred_label, 10)
+
+    pred = pred.detach().squeeze().numpy()
+    pred = (pred == np.max(pred, axis=0))
+    lab_tensor = lab_tensor.squeeze().numpy().astype(bool)
+    specificity = m_utils.specificityB(lab_tensor, pred)
     confusion = metrics.confusion_matrix(actual_label, pred_label)
     if confusion.shape[0] == 9:
         confusion = np.hstack((confusion, np.zeros(9)[:, np.newaxis]))
@@ -136,4 +141,4 @@ def ts():
 
     all_avg = m_utils.average_metrics(patients_avgs)
     all_std = m_utils.stdev_metrics(patients_avgs)
-    plot_table("ALL", all_avg, std=all_std)
+    latex("ALL", all_avg, std=all_std)
