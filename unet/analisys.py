@@ -4,8 +4,9 @@ import ast
 from statistics import stdev
 from matplotlib import pyplot
 import numpy as np
-data_path_acc = "/home/nonari/Descargas/no_pretrained/accuracy"
-data_path_loss = "/home/nonari/Descargas/no_pretrained/loss"
+model = 'densenet169_cp_ca'
+data_path_acc = f"/home/nonari/Documentos/experimentos/{model}/accuracy"
+data_path_loss = f"/home/nonari/Documentos/experimentos/{model}/loss"
 
 
 def avg(arr):
@@ -65,12 +66,13 @@ acc_stdev = dev(acc_train_all)
 loss = avg(loss_train_all)
 loss_stdev = dev(loss_train_all)
 
-pyplot.plot(epoch_acc_train_all[0], acc)
+pyplot.plot(epoch_acc_train_all[0], acc, label='Accuracy')
 pyplot.fill_between(epoch_acc_train_all[0], acc-acc_stdev, acc + acc_stdev, alpha=0.5)
-pyplot.title("NP AVG accuracy")
-pyplot.show()
-
-pyplot.plot(epoch_acc_train_all[0], loss)
+pyplot.plot(epoch_acc_train_all[0], loss, label='Loss')
 pyplot.fill_between(epoch_acc_train_all[0], loss-loss_stdev, loss + loss_stdev, alpha=0.5)
-pyplot.title("NP AVG Loss")
+pyplot.title("Densenet169")
+pyplot.xlabel('Epochs')
+pyplot.ylabel('Puntuación')
+pyplot.grid()
+pyplot.legend()
 pyplot.show()

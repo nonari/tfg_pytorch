@@ -1,41 +1,74 @@
 from testing import config
 import sys
 from os import path
+import decimal
+
+# create a new context for this task
+ctx = decimal.Context()
+
+# 20 digits should be enough for everyone :D
+ctx.prec = 20
+
+def float_to_str(f):
+    """
+    Convert the given float to a string,
+    without resorting to scientific notation
+    """
+    d1 = ctx.create_decimal(repr(f))
+    return format(d1, 'f')
+
 
 table="\\begin{{table}}[]\n"\
       "\\begin{{tabular}}{{l|l|l|l|l|l|l|l|l|l|l|l|l|}}\n"\
       "\cline{{2-13}}\n"\
       "& \multicolumn{{2}}{{c|}}{{Loss}} & \multicolumn{{2}}{{c|}}{{Dice}} & \multicolumn{{2}}{{c|}}{{Sensibilidad}} & \multicolumn{{2}}{{c|}}{{Especificidad}} & \multicolumn{{2}}{{c|}}{{Precisión}} & \multicolumn{{2}}{{c|}}{{Jaccard}} \\\\ \cline{{2-13}} \n"\
-      "& media        & desv       & media        & desv       & media            & desv           & media            & desv            & media          & desv          & media         & desv         \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{HV}}      & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{NFL}}     & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{GCL-IPL}} & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{INL}}     & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{OPL}}     & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{OPL-ISM}} & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{ISE}}     & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{OS-RPE}}  & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{C}}      & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{Fluid}}   & {}            & {}          & {}            & {}          & {}                & {}              & {}                & {}               & {}              & {}             & {}             & {}            \\\\ \hline\n"\
+      "& media & desv & media & desv & media & desv & media & desv & media & desv & media & desv \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{HV}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{NFL}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{GCL-IPL}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{INL}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{OPL}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{OPL-ISM}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{ISE}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{OS-RPE}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{C}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
+      "\multicolumn{{1}}{{|l|}}{{Fluid}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
       "\end{{tabular}}\n"\
       "\end{{table}}\n"
 
+conf_table_wstd="\\begin{{table}}[]\n" \
+"\\begin{{tabular}}{{|l|l|l|l|l|l|l|l|l|l|l|}}\n" \
+"\hline\n" \
+"\\backslashbox{{Real}}{{Pred}} & HV & NFL & GCL-IPL & INL & OPL & OPL-ISM & ISE & OS-RPE & C & Fluid \\\\ \hline\n" \
+"HV & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"NFL & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"GCL-IPL & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"INL & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"OPL & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"OPL-ISM & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"ISE & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"OS-RPE & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"C & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"Fluid & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
+"\end{{tabular}}\n" \
+"\end{{table}}\n"
+
 conf_table="\\begin{{table}}[]\n" \
-           "\\begin{{tabular}}{{l|l|l|l|l|l|l|l|l|l|l|}}\n" \
-           "\cline{{2-11}}\n" \
-           "                              & HV & NFL & GCL-IPL & INL & OPL & OPL-ISM & ISE & OS-RPE & C & Fluid \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{HV}}      & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{NFL}}     & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{GCL-IPL}} & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{INL}}     & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{OPL}}     & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{OPL-ISM}} & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{ISE}}     & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{OS-RPE}}  & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{C}}       & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\multicolumn{{1}}{{|l|}}{{Fluid}}   & \\nicefrac{}{}  & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}   & \\nicefrac{}{}       & \\nicefrac{}{}   & \\nicefrac{}{}      & \\nicefrac{}{} & \\nicefrac{}{}     \\\\ \hline\n" \
-           "\end{{tabular}}\n" \
-           "\end{{table}}\n"
+"\\begin{{tabular}}{{|l|l|l|l|l|l|l|l|l|l|l|}}\n" \
+"\hline\n" \
+"\\backslashbox{{Real}}{{Pred}} & HV & NFL & GCL-IPL & INL & OPL & OPL-ISM & ISE & OS-RPE & C & Fluid \\\\ \hline\n" \
+"HV & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"NFL & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"GCL-IPL & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"INL & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"OPL & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"OPL-ISM & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"ISE & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"OS-RPE & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"C & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"Fluid & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
+"\end{{tabular}}\n" \
+"\end{{table}}\n"
 
 layers = ["HV", "NFL", "GCL-IPL", "INL", "OPL", "OPL-ISM", "ISE", "OS-RPE", "XX", "Fluid"]
 
@@ -91,18 +124,22 @@ def plot_table(patient, data, std):
 
     print()
     data_fomat.clear()
+    data_formatB = []
     for i in range(10):
-        std_c = confusion_std[:, i].tolist()
-        conf = confusion[:, i]
+        std_c = confusion_std[i, :].tolist()
+        conf = confusion[i, :]
         for a, b in zip(std_c, conf):
             data_fomat += ['{'+trunc(b)+'}', '{'+trunc(a)+'}']
-    print(conf_table.format(*data_fomat))
+            data_formatB.append(trunc(b))
+    print(conf_table_wstd.format(*data_fomat))
+    print()
+    print(conf_table.format(*data_formatB))
 
     sys.stdout.close()
 
 
 def trunc(num):
-    s = str(num)
+    s = float_to_str(num)
     if len(s) > 5:
         if float(s[:5]) == 0:
             return '0.0'
