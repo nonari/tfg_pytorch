@@ -2,6 +2,19 @@ import numpy as np
 from sklearn import metrics
 
 
+def summarize_metrics(patient):
+    ground = list(map(lambda e: e['mask'], patient))
+    pred = list(map(lambda e: e['prediction'], patient))
+    loss = list(map(lambda e: e['loss'], patient))
+
+    ground = tuple(ground)
+    pred = tuple(pred)
+
+    ground = np.dstack(ground).flatten()
+    pred = np.dstack(ground).flatten()
+
+
+
 def average_metrics(scores):
     f1 = list(map(lambda e: e['f1'], scores))
     recall = list(map(lambda e: e['recall'], scores))

@@ -17,40 +17,22 @@ from testing import config
 from utils import f_utils
 
 
-def test(net, img_tensor, lab_tensor):
+def test_s(net, img_tensor, lab_tensor):
     net.eval()
 
     pred = net(img_tensor)
     criterion = nn.BCEWithLogitsLoss()
 
-    loss = criterion(pred, lab_tensor)
+    # loss = criterion(pred, lab_tensor)
     #print("Test/Loss:", loss.item())
+    losses = []
+    for i in range(0, 10):
+        lss = criterion(pred[0, i], lab_tensor[0, i])
+        losses.append(lss.item())
+    actual_label = t_utils.tensor_to_mask(lab_tensor)
+    pred_label = t_utils.prediction_to_mask_x(pred)
 
-    actual_label = t_utils.tensor_to_mask(lab_tensor).flatten()
-    pred_label = t_utils.prediction_to_mask(pred).flatten()
-
-    mask = t_utils.prediction_to_mask(pred)
-
-    jaccard = metrics.jaccard_score(actual_label, pred_label, average=None)
-    recall = metrics.recall_score(actual_label, pred_label, average=None, zero_division=1)
-    f1 = metrics.f1_score(actual_label, pred_label, average=None)
-    confusion = metrics.confusion_matrix(actual_label, pred_label)
-    if confusion.shape[0] == 10:
-        confusion = np.hstack((confusion, np.zeros(10)[:, np.newaxis]))
-        confusion = np.vstack((confusion, np.zeros(11)))
-        confusion[10, 10] = 1
-        jaccard = np.append(jaccard, 1)
-        recall = np.append(recall, 1)
-        f1 = np.append(f1, 1)
-
-    total_by_class = np.sum(confusion, axis=1)
-    if total_by_class[10] == 0:
-        confusion[10, 10] = 1
-        total_by_class[10] = 1
-    total_by_class = total_by_class[:, np.newaxis]
-    confusion = confusion / total_by_class
-
-    return {"loss": loss.item(), "jaccard": jaccard, "recall": recall, "f1": f1, "confusion": confusion, "mask": mask}
+    return {"loss": losses, "prediction": pred_label, "mask": actual_label}
 
 
 def test_no_back(net, img_tensor, lab_tensor):
