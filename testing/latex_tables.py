@@ -1,7 +1,9 @@
 from testing import config
 import sys
 from os import path
+from sklearn.metrics import ConfusionMatrixDisplay
 import decimal
+from matplotlib import pyplot as plt
 
 # create a new context for this task
 ctx = decimal.Context()
@@ -70,7 +72,7 @@ conf_table="\\begin{{table}}[]\n" \
 "\end{{tabular}}\n" \
 "\end{{table}}\n"
 
-layers = ["HV", "NFL", "GCL-IPL", "INL", "OPL", "OPL-ISM", "ISE", "OS-RPE", "XX", "Fluid"]
+layers = ["HV", "NFL", "GCL-IPL", "INL", "OPL", "OPL-ISM", "ISE", "OS-RPE", "C", "Fluid"]
 
 def print_header():
     print("          Loss      Dice      Recall    Specif    Accuracy  Jaccard")
@@ -97,6 +99,7 @@ def print_data_line(class_n, data, padding=10, skip=False):
 
 
 def plot_table(patient, data, std):
+    exp_name = path.basename(config.save_data_dir).__str__()
     f1 = data["f1"]
     recall = data["recall"]
     specif = data["specificity"]
@@ -105,7 +108,7 @@ def plot_table(patient, data, std):
     loss = data["loss"]
     confusion = data["confusion"]
 
-    sys.stdout = open(path.join(config.save_data_dir, "latex.txt"), 'a')
+    sys.stdout = open(path.join(config.save_data_dir, f'/home/nonari/Documents/tablas/{exp_name}.txt', ), 'a')
 
     f1_std = std["f1"]
     recall_std = std["recall"]
@@ -122,21 +125,13 @@ def plot_table(patient, data, std):
     data_fomat = list(map(lambda n: trunc(n), data_fomat))
     print(table.format(*data_fomat))
 
-    print()
-    data_fomat.clear()
-    data_formatB = []
-    for i in range(10):
-        std_c = confusion_std[i, :].tolist()
-        conf = confusion[i, :]
-        for a, b in zip(std_c, conf):
-            data_fomat += ['{'+trunc(b)+'}', '{'+trunc(a)+'}']
-            data_formatB.append(trunc(b))
-    print(conf_table_wstd.format(*data_fomat))
-    print()
-    print(conf_table.format(*data_formatB))
-
     sys.stdout.close()
 
+    confusion = (confusion * 1000).astype(int)
+    confusion = confusion / 10
+    conf_disp = ConfusionMatrixDisplay(confusion_matrix=confusion, display_labels=layers)
+    conf_disp.plot(xticks_rotation=25, values_format='.1f')
+    plt.savefig(f'/home/nonari/Documents/confusion/{exp_name}_conf.png', bbox_inches = "tight")
 
 def trunc(num):
     s = float_to_str(num)

@@ -1,9 +1,30 @@
 import numpy as np
 from sklearn import metrics
 
+from unet.loader import im_to_tensor
+
+
+def accuracy(true, prediction, classes=10):
+    l = []
+    for i in range(1, classes+1):
+        true_copy = true.copy()
+        pred_copy = prediction.copy()
+        true_copy[true_copy != i] = 0
+        pred_copy[pred_copy != i] = 0
+        acc = metrics.accuracy_score(true_copy, pred_copy)
+        # stat = metrics.confusion_matrix(true_copy, pred_copy).ravel()
+        # if len(stat) > 1:
+        #     tn, fp, fn, tp = stat
+        #     sp = (tp + tn) / (tp + tn + fp + fn)
+        # else:
+        #     sp = 1
+        l.append(acc)
+
+    return l
+
 
 def summarize_metrics(patient):
-    ground = list(map(lambda e: e['mask'], patient))
+    ground = list(map(lambda e: e['truth'], patient))
     pred = list(map(lambda e: e['prediction'], patient))
     loss = list(map(lambda e: e['loss'], patient))
 
@@ -11,8 +32,22 @@ def summarize_metrics(patient):
     pred = tuple(pred)
 
     ground = np.dstack(ground).flatten()
-    pred = np.dstack(ground).flatten()
+    pred = np.dstack(pred).flatten()
 
+    fshape = (1, ground.shape[0])
+    ground_tensor = im_to_tensor(ground.reshape(fshape), shape=fshape).numpy()
+    pred_tensor = im_to_tensor(pred.reshape(fshape), shape=fshape).numpy()
+
+    jaccard = metrics.jaccard_score(ground, pred, average=None)
+    recall = metrics.recall_score(ground, pred, average=None)
+    f1 = metrics.f1_score(ground, pred, average=None)
+    # prec = metrics.precision_score(ground, pred, average=None)
+    prec = specificityB(ground_tensor, pred_tensor)
+    confusion = metrics.confusion_matrix(ground, pred, normalize='true')
+    acc = accuracy(ground, pred)
+    loss = np.mean(loss, axis=0)
+    return {"loss": loss, "f1": f1, "recall": recall, "accuracy": acc,
+            "jaccard": jaccard, "confusion": confusion, "specificity": prec}
 
 
 def average_metrics(scores):
@@ -102,20 +137,4 @@ def specificity(true, prediction, classes=10):
     return l
 
 
-def accuracy(true, prediction, classes=10):
-    l = []
-    for i in range(1, classes+1):
-        true_copy = true.copy()
-        pred_copy = prediction.copy()
-        true_copy[true_copy != i] = 0
-        pred_copy[pred_copy != i] = 0
-        acc = metrics.accuracy_score(true_copy, pred_copy)
-        # stat = metrics.confusion_matrix(true_copy, pred_copy).ravel()
-        # if len(stat) > 1:
-        #     tn, fp, fn, tp = stat
-        #     sp = (tp + tn) / (tp + tn + fp + fn)
-        # else:
-        #     sp = 1
-        l.append(acc)
 
-    return l

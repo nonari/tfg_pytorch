@@ -13,7 +13,7 @@ from utils import t_utils
 from PIL import Image
 
 
-def im_to_tensor(im):
+def im_to_tensor(im, shape=(512, 512)):
     d = np.unique(im).tolist()
     l = []
     for idx, n in enumerate(d):
@@ -21,12 +21,12 @@ def im_to_tensor(im):
         t = np.zeros((im.shape[0], im.shape[1]), np.float32)
         t[i] = 1
         t = transforms.ToPILImage()(t)
-        t = transforms.Resize((512, 512), Image.NEAREST)(t)
+        t = transforms.Resize(shape, Image.NEAREST)(t)
         l.append(t)
     if len(d) == 9:
         t = np.zeros((im.shape[0], im.shape[1]), np.float32)
         t = transforms.ToPILImage()(t)
-        t = transforms.Resize((512, 512), Image.NEAREST)(t)
+        t = transforms.Resize(shape, Image.NEAREST)(t)
         l.append(t)
     st = np.dstack(tuple(l))
     st = np.swapaxes(st, 0, 2)
