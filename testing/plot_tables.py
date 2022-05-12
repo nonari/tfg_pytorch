@@ -32,7 +32,7 @@ def print_data_line(class_n, data, padding=10, skip=False):
 def plot_table(patient, data, std=None):
     f1 = data["f1"]
     recall = data["recall"]
-    specif = data["specificity"]
+    # specif = data["specificity"]
     accur = data["accuracy"]
     jaccard = data["jaccard"]
     loss = data["loss"]
@@ -42,19 +42,19 @@ def plot_table(patient, data, std=None):
     print_patient(patient)
     print_header()
     for i in range(10):
-        print_data_line(i, [loss[i], f1[i], recall[i], specif[i], accur[i], jaccard[i]])
+        print_data_line(i, [loss[i], f1[i], recall[i], accur[i], jaccard[i]])
 
     if std is not None:
         f1_std = std["f1"]
         recall_std = std["recall"]
-        specif_std = std["specificity"]
+
         accur_std = std["accuracy"]
         jaccard_std = std["jaccard"]
         loss_std = std["loss"]
         confusion_std = std["confusion"]
         print_header()
         for i in range(10):
-            print_data_line(i, [loss_std[i], f1_std[i], recall_std[i], specif_std[i], accur_std[i], jaccard_std[i]])
+            print_data_line(i, [loss_std[i], f1_std[i], recall_std[i], accur_std[i], jaccard_std[i]])
 
         print()
         print_confusion_header()

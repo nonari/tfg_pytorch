@@ -102,24 +102,24 @@ def plot_table(patient, data, std):
     exp_name = path.basename(config.save_data_dir).__str__()
     f1 = data["f1"]
     recall = data["recall"]
-    specif = data["specificity"]
+    # specif = data["specificity"]
     accur = data["accuracy"]
     jaccard = data["jaccard"]
     loss = data["loss"]
     confusion = data["confusion"]
 
-    sys.stdout = open(path.join(config.save_data_dir, f'/home/nonari/Documents/tablas/{exp_name}.txt', ), 'a')
+    sys.stdout = open(path.join(config.save_data_dir, f'{exp_name}.txt'), 'a')
 
     f1_std = std["f1"]
     recall_std = std["recall"]
-    specif_std = std["specificity"]
+    # specif_std = std["specificity"]
     accur_std = std["accuracy"]
     jaccard_std = std["jaccard"]
     loss_std = std["loss"]
     confusion_std = std["confusion"]
     data_fomat = []
     for i in range(10):
-        data_fomat += [loss[i], loss_std[i], f1[i], f1_std[i], recall[i], recall_std[i], specif[i], specif_std[i],
+        data_fomat += [loss[i], loss_std[i], f1[i], f1_std[i], recall[i], recall_std[i], 0, 0,
                        accur[i], accur_std[i], jaccard[i], jaccard_std[i]]
 
     data_fomat = list(map(lambda n: trunc(n), data_fomat))
@@ -131,7 +131,7 @@ def plot_table(patient, data, std):
     confusion = confusion / 10
     conf_disp = ConfusionMatrixDisplay(confusion_matrix=confusion, display_labels=layers)
     conf_disp.plot(xticks_rotation=25, values_format='.1f')
-    plt.savefig(f'/home/nonari/Documents/confusion/{exp_name}_conf.png', bbox_inches = "tight")
+    plt.savefig(path.join(config.save_data_dir, f'{exp_name}_conf.png'), bbox_inches="tight")
 
 def trunc(num):
     s = float_to_str(num)

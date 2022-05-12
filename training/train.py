@@ -81,7 +81,7 @@ def tt():
             encoder_name=encoder,
             encoder_weights=pretraining,
             in_channels=1,
-            classes=10,
+            classes=9,
         )
 
         net.to(device=device)

@@ -35,25 +35,25 @@ def summarize_metrics(patient):
     pred = np.dstack(pred).flatten()
 
     fshape = (1, ground.shape[0])
-    ground_tensor = im_to_tensor(ground.reshape(fshape), shape=fshape).numpy()
-    pred_tensor = im_to_tensor(pred.reshape(fshape), shape=fshape).numpy()
+    # ground_tensor = im_to_tensor(ground.reshape(fshape), shape=fshape).numpy()
+    # pred_tensor = im_to_tensor(pred.reshape(fshape), shape=fshape).numpy()
 
     jaccard = metrics.jaccard_score(ground, pred, average=None)
-    recall = metrics.recall_score(ground, pred, average=None)
+    recall = metrics.recall_score(ground, pred, average=None, zero_division=0)
     f1 = metrics.f1_score(ground, pred, average=None)
     # prec = metrics.precision_score(ground, pred, average=None)
-    prec = specificityB(ground_tensor, pred_tensor)
+    # prec = specificityB(ground_tensor, pred_tensor)
     confusion = metrics.confusion_matrix(ground, pred, normalize='true')
     acc = accuracy(ground, pred)
     loss = np.mean(loss, axis=0)
     return {"loss": loss, "f1": f1, "recall": recall, "accuracy": acc,
-            "jaccard": jaccard, "confusion": confusion, "specificity": prec}
+            "jaccard": jaccard, "confusion": confusion}
 
 
 def average_metrics(scores):
     f1 = list(map(lambda e: e['f1'], scores))
     recall = list(map(lambda e: e['recall'], scores))
-    specif = list(map(lambda e: e['specificity'], scores))
+    # specif = list(map(lambda e: e['specificity'], scores))
     acc = list(map(lambda e: e['accuracy'], scores))
     jaccard = list(map(lambda e: e['jaccard'], scores))
     confusion = list(map(lambda e: e['confusion'], scores))
@@ -62,20 +62,20 @@ def average_metrics(scores):
     f1_mean = np.mean(f1, axis=0)
     recall = np.mean(recall, axis=0)
     jaccard = np.mean(jaccard, axis=0)
-    spe_mean = np.mean(specif, axis=0)
+    # spe_mean = np.mean(specif, axis=0)
     acc_mean = np.mean(acc, axis=0)
     confusion = np.mean(np.dstack(tuple(confusion)), axis=2)
     loss = np.mean(loss, axis=0)
 
 
-    return {"loss": loss, "f1": f1_mean, "recall": recall, "specificity": spe_mean, "accuracy": acc_mean,
+    return {"loss": loss, "f1": f1_mean, "recall": recall, "accuracy": acc_mean,
             "jaccard": jaccard, "confusion": confusion}
 
 
 def stdev_metrics(scores):
     f1 = list(map(lambda e: e['f1'], scores))
     recall = list(map(lambda e: e['recall'], scores))
-    specif = list(map(lambda e: e['specificity'], scores))
+    # specif = list(map(lambda e: e['specificity'], scores))
     acc = list(map(lambda e: e['accuracy'], scores))
     jaccard = list(map(lambda e: e['jaccard'], scores))
     confusion = list(map(lambda e: e['confusion'], scores))
@@ -84,12 +84,12 @@ def stdev_metrics(scores):
     f1_mean = np.std(f1, axis=0)
     recall = np.std(recall, axis=0)
     jaccard = np.std(jaccard, axis=0)
-    spe_mean = np.std(specif, axis=0)
+    # spe_mean = np.std(specif, axis=0)
     acc_mean = np.std(acc, axis=0)
     confusion = np.std(np.dstack(tuple(confusion)), axis=2)
     loss = np.std(loss, axis=0)
 
-    return {"loss": loss, "f1": f1_mean, "recall": recall, "specificity": spe_mean, "accuracy": acc_mean,
+    return {"loss": loss, "f1": f1_mean, "recall": recall, "accuracy": acc_mean,
             "jaccard": jaccard, "confusion": confusion}
 
 

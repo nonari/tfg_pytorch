@@ -1,4 +1,4 @@
-from testing.metrics import ts
+from testing.metrics_l import ts
 import argparse
 from testing.config import set_data
 

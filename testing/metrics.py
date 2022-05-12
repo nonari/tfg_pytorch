@@ -91,7 +91,7 @@ def ts():
     for idx, model in enumerate(models):
         m = re.search('best_model_p(\d+)\.pth', model)
         idx = m.group(1)
-        isbi_dataset = Test_Loader(config.test_images_dir, idx)
+        isbi_dataset = Test_Loader(config.test_images_dir)
         train_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
                                                    batch_size=1,
                                                    shuffle=False)
@@ -105,17 +105,20 @@ def ts():
         net.load_state_dict(torch.load(model, map_location=device))
 
         patient_results = []
-        for img_tensor, lab_tensor, filename in train_loader:
+        for idxp, (img_tensor, lab_tensor, filename) in enumerate(train_loader):
+            # if idxp > 10:
+            #     break
             img_tensor = img_tensor.to(device=device, dtype=torch.float32)
             lab_tensor = lab_tensor.to(device=device, dtype=torch.float32)
             results = test_s(net, img_tensor, lab_tensor)
+            print(results)
             # results = test_no_back(net, img_tensor, lab_tensor)
             patient_results.append(results)
             mask = results["prediction"]
             # mask = results["mask"]
-            # filename = filename[0].replace("img", "seg")
-            # mask_path = path.join(config.save_data_dir, filename)
-            # plt.imsave(mask_path, mask)
+            filename = filename[0].replace("img", "seg")
+            mask_path = path.join(config.save_data_dir, filename)
+            plt.imsave(mask_path, mask)
 
         avg_patient_results = m_utils.summarize_metrics(patient_results)
         # avg_patient_results = m_utils.average_metrics(patient_results)

@@ -16,6 +16,7 @@ from PIL import Image
 def im_to_tensor(im, shape=(512, 512)):
     d = np.unique(im).tolist()
     l = []
+    # print(len(d))
     for idx, n in enumerate(d):
         i = np.where(im == n)
         t = np.zeros((im.shape[0], im.shape[1]), np.float32)
@@ -23,11 +24,11 @@ def im_to_tensor(im, shape=(512, 512)):
         t = transforms.ToPILImage()(t)
         t = transforms.Resize(shape, Image.NEAREST)(t)
         l.append(t)
-    if len(d) == 9:
-        t = np.zeros((im.shape[0], im.shape[1]), np.float32)
-        t = transforms.ToPILImage()(t)
-        t = transforms.Resize(shape, Image.NEAREST)(t)
-        l.append(t)
+    # if len(d) == 9:
+    #     t = np.zeros((im.shape[0], im.shape[1]), np.float32)
+    #     t = transforms.ToPILImage()(t)
+    #     t = transforms.Resize(shape, Image.NEAREST)(t)
+    #     l.append(t)
     st = np.dstack(tuple(l))
     st = np.swapaxes(st, 0, 2)
     st = np.swapaxes(st, 1, 2)
@@ -60,12 +61,15 @@ def augment(im, mask):
 
 
 class ISBI_Loader(Dataset):
-    def __init__(self, data_path, patient_left=0, augment=False):
+    def __init__(self, data_path, patient_left=None, augment=False):
         # Initialization function, read all the pictures under data_path
         self.data_path = data_path
         self.patient_left = patient_left
         self.augment = augment
-        discard = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
+        if patient_left is None:
+            discard = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
+        else:
+            discard = []
         self.imgs_path = glob.glob(os.path.join(data_path, f'img_*'))
         for path in discard:
             self.imgs_path.remove(path)
@@ -81,7 +85,7 @@ class ISBI_Loader(Dataset):
         # Convert the data to a single channel picture
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
-
+        # print(label_path)
         label = im_to_tensor(label)
 
         if self.augment and random.random() > 0.5:
@@ -97,10 +101,13 @@ class ISBI_Loader(Dataset):
 
 
 class Test_Loader(ISBI_Loader):
-    def __init__(self, data_path, patient_left=0):
+    def __init__(self, data_path, patient_left=None):
         # Initialization function, read all the pictures under data_path
         super().__init__(data_path, patient_left)
-        self.imgs_path = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
+        if patient_left is None:
+            self.imgs_path = glob.glob(os.path.join(data_path, f'img_*'))
+        else:
+            self.imgs_path = glob.glob(os.path.join(data_path, f'img_{patient_left}_*'))
 
     def __getitem__(self, index):
         img, seg = ISBI_Loader.__getitem__(self, index)
