@@ -22,7 +22,7 @@ def im_to_tensor(im, shape=(512, 512)):
         t = np.zeros((im.shape[0], im.shape[1]), np.float32)
         t[i] = 1
         t = transforms.ToPILImage()(t)
-        t = transforms.Resize(shape, Image.NEAREST)(t)
+        t = transforms.Resize(shape, transforms.InterpolationMode.NEAREST)(t)
         l.append(t)
     # if len(d) == 9:
     #     t = np.zeros((im.shape[0], im.shape[1]), np.float32)
@@ -39,19 +39,19 @@ def im_to_tensor(im, shape=(512, 512)):
 im_trans = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.5], [0.5]),
-    transforms.Resize((512, 512), Image.BILINEAR)
+    transforms.Resize((512, 512), transforms.InterpolationMode.BILINEAR)
 ])
 
 
 def augment(im, mask):
     im = transforms.ToTensor()(im)
     i, j, h, w = transforms.RandomResizedCrop.get_params(im, [0.95, 1.0], [1.0, 1.0])
-    im = F.resized_crop(im, i, j, h, w, [512, 512], interpolation=Image.BILINEAR)
-    mask = F.resized_crop(mask, i, j, h, w, [512, 512], interpolation=Image.NEAREST)
+    im = F.resized_crop(im, i, j, h, w, [512, 512], interpolation=transforms.InterpolationMode.BILINEAR)
+    mask = F.resized_crop(mask, i, j, h, w, [512, 512], interpolation=transforms.InterpolationMode.NEAREST)
 
     ang = transforms.RandomRotation.get_params([-5, 5])
-    im = F.rotate(im, ang, resample=Image.BILINEAR)
-    mask = F.rotate(mask, ang, resample=Image.NEAREST)
+    im = F.rotate(im, ang, interpolation=transforms.InterpolationMode.BILINEAR)
+    mask = F.rotate(mask, ang, interpolation=transforms.InterpolationMode.NEAREST)
 
     if torch.rand(1) < 0.4:
         im = F.hflip(im)
