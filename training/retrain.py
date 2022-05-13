@@ -81,13 +81,17 @@ def tt():
             encoder_name=encoder,
             encoder_weights=pretraining,
             in_channels=1,
-            classes=9,
+            classes=10,
         )
 
+        net.load_state_dict(torch.load(config.old_model, map_location=torch.device('cpu')))
         old_weight = net.segmentation_head[0].weight.sum(dim=1, keepdim=True)
         net.segmentation_head[0] = torch.nn.Conv2d(16, 9, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-        net.segmentation_head[0].weight.data = old_weight
-        net.load_state_dict(torch.load(config.old_model))
+        # net.segmentation_head[0].weight.data = old_weight
+        for param in net.decoder.blocks[0].conv1[0].parameters():
+            param.requires_grad = False
+        for param in net.decoder.blocks[0].conv2[0].parameters():
+            param.requires_grad = False
         net.to(device=device)
         isbi_dataset = ISBI_Loader(config.train_data_dir, i, augment=config.augment)
         train_net(net, device, isbi_dataset, epochs=config.epochs, batch_size=config.batch, lr=config.lr)
