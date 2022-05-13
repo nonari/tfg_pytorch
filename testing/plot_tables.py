@@ -41,7 +41,7 @@ def plot_table(patient, data, std=None):
     sys.stdout = open(path.join(config.save_data_dir, "results.txt"), 'a')
     print_patient(patient)
     print_header()
-    for i in range(10):
+    for i in range(9):
         print_data_line(i, [loss[i], f1[i], recall[i], accur[i], jaccard[i]])
 
     if std is not None:
@@ -53,17 +53,17 @@ def plot_table(patient, data, std=None):
         loss_std = std["loss"]
         confusion_std = std["confusion"]
         print_header()
-        for i in range(10):
+        for i in range(9):
             print_data_line(i, [loss_std[i], f1_std[i], recall_std[i], accur_std[i], jaccard_std[i]])
 
         print()
         print_confusion_header()
-        for i in range(10):
+        for i in range(9):
             print_data_line(i, confusion_std[:, i], padding=8)
 
     print()
     print_confusion_header()
-    for i in range(10):
+    for i in range(9):
         print_data_line(i, confusion[:, i], padding=8)
 
     sys.stdout.close()

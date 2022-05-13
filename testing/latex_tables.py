@@ -34,7 +34,6 @@ table="\\begin{{table}}[]\n"\
       "\multicolumn{{1}}{{|l|}}{{ISE}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
       "\multicolumn{{1}}{{|l|}}{{OS-RPE}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
       "\multicolumn{{1}}{{|l|}}{{C}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
-      "\multicolumn{{1}}{{|l|}}{{Fluid}} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n"\
       "\end{{tabular}}\n"\
       "\end{{table}}\n"
 
@@ -51,7 +50,6 @@ conf_table_wstd="\\begin{{table}}[]\n" \
 "ISE & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
 "OS-RPE & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
 "C & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
-"Fluid & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} & \\nicefrac{}{} \\\\ \hline\n" \
 "\end{{tabular}}\n" \
 "\end{{table}}\n"
 
@@ -68,11 +66,10 @@ conf_table="\\begin{{table}}[]\n" \
 "ISE & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
 "OS-RPE & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
 "C & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
-"Fluid & {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\ \hline\n" \
 "\end{{tabular}}\n" \
 "\end{{table}}\n"
 
-layers = ["HV", "NFL", "GCL-IPL", "INL", "OPL", "OPL-ISM", "ISE", "OS-RPE", "C", "Fluid"]
+layers = ["HV", "NFL", "GCL-IPL", "INL", "OPL", "OPL-ISM", "ISE", "OS-RPE", "C"]
 
 def print_header():
     print("          Loss      Dice      Recall    Specif    Accuracy  Jaccard")
@@ -118,7 +115,7 @@ def plot_table(patient, data, std):
     loss_std = std["loss"]
     confusion_std = std["confusion"]
     data_fomat = []
-    for i in range(10):
+    for i in range(9):
         data_fomat += [loss[i], loss_std[i], f1[i], f1_std[i], recall[i], recall_std[i], 0, 0,
                        accur[i], accur_std[i], jaccard[i], jaccard_std[i]]
 

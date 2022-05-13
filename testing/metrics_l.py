@@ -58,7 +58,7 @@ def test_no_back(net, img_tensor, lab_tensor):
     # loss = criterion(pred, lab_tensor)
     #print("Test/Loss:", loss.item())
     losses = []
-    for i in range(0, 10):
+    for i in range(0, 9):
         lss = criterion(pred[0, i], lab_tensor[0, i])
         losses.append(lss.item())
     actual_label = t_utils.tensor_to_mask(lab_tensor).flatten()
@@ -77,18 +77,8 @@ def test_no_back(net, img_tensor, lab_tensor):
     lab_tensor = lab_tensor.squeeze().numpy().astype(bool)
     specificity = m_utils.specificityB(lab_tensor, pred_tensor.numpy().astype(bool))
     confusion = metrics.confusion_matrix(actual_label, pred_label)
-    if confusion.shape[0] == 9:
-        confusion = np.hstack((confusion, np.zeros(9)[:, np.newaxis]))
-        confusion = np.vstack((confusion, np.zeros(10)))
-        confusion[9, 9] = 1
-        jaccard = np.append(jaccard, 1)
-        recall = np.append(recall, 1)
-        f1 = np.append(f1, 1)
 
     total_by_class = np.sum(confusion, axis=1)
-    if total_by_class[9] == 0:
-        confusion[9, 9] = 1
-        total_by_class[9] = 1
     total_by_class = total_by_class[:, np.newaxis]
     confusion = confusion / total_by_class
     accuracy = m_utils.accuracy(actual_label, pred_label)
@@ -116,7 +106,7 @@ def ts():
             encoder_name=config.encoder,
             encoder_weights=None,
             in_channels=1,
-            classes=10,
+            classes=9,
         )
         net.load_state_dict(torch.load(model, map_location=device))
 
@@ -133,6 +123,7 @@ def ts():
             mask_path = path.join(config.save_data_dir, filename)
             mask[0,0] = 10
             plt.imsave(mask_path, mask)
+            break
 
         # avg_patient_results = m_utils.summarize_metrics(patient_results)
         avg_patient_results = m_utils.average_metrics(patient_results)
@@ -141,6 +132,8 @@ def ts():
         del net
         del device
 
+
     all_avg = m_utils.average_metrics(patients_avgs)
     all_std = m_utils.stdev_metrics(patients_avgs)
     latex("ALL", all_avg, std=all_std)
+    plot_table(99, all_avg)
