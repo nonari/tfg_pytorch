@@ -14,6 +14,7 @@ ini = None
 end = None
 batch = None
 parts = None
+old_model = None
 
 
 def set_data(d):
@@ -28,3 +29,4 @@ def set_data(d):
     setattr(this, "lr", d.lr)
     setattr(this, "ini", d.ini)
     setattr(this, "end", d.end)
+    setattr(this, "old_model", d.old_model)

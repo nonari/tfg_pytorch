@@ -27,7 +27,7 @@ def prediction_to_mask_x(tensor):
 
 mask_trans = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((512, 512), transforms.InterpolationMode.NEAREST),
+    transforms.Resize((512, 512), Image.NEAREST),
     transforms.PILToTensor()
 ])
 

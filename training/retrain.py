@@ -84,6 +84,10 @@ def tt():
             classes=9,
         )
 
+        old_weight = net.segmentation_head[0].weight.sum(dim=1, keepdim=True)
+        net.segmentation_head[0] = torch.nn.Conv2d(16, 9, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        net.segmentation_head[0].weight.data = old_weight
+        net.load_state_dict(torch.load(config.old_model))
         net.to(device=device)
         isbi_dataset = ISBI_Loader(config.train_data_dir, i, augment=config.augment)
         train_net(net, device, isbi_dataset, epochs=config.epochs, batch_size=config.batch, lr=config.lr)

@@ -16,6 +16,7 @@ def args():
     argument_parser.add_argument('--augment', action="store_true")
     argument_parser.add_argument('--batch', type=int, default=9)
     argument_parser.add_argument('--parts', type=int, default=1)
+    argument_parser.add_argument('--old_model', type=str, default='')
     parsed_args = argument_parser.parse_args()
 
     print(parsed_args)
