@@ -75,7 +75,7 @@ def test_no_back(net, img_tensor, lab_tensor):
     recall = metrics.recall_score(actual_label, pred_label, average=None, zero_division=1)
     f1 = metrics.f1_score(actual_label, pred_label, average=None)
     lab_tensor = lab_tensor.squeeze().numpy().astype(bool)
-    specificity = m_utils.specificityB(lab_tensor, pred_tensor.numpy().astype(bool))
+    # specificity = m_utils.specificityB(lab_tensor, pred_tensor.numpy().astype(bool))
     confusion = metrics.confusion_matrix(actual_label, pred_label)
 
     total_by_class = np.sum(confusion, axis=1)
@@ -83,7 +83,7 @@ def test_no_back(net, img_tensor, lab_tensor):
     confusion = confusion / total_by_class
     accuracy = m_utils.accuracy(actual_label, pred_label)
 
-    return {"loss": losses, "jaccard": jaccard, "recall": recall, "specificity": specificity, "accuracy": accuracy,
+    return {"loss": losses, "jaccard": jaccard, "recall": recall, "specificity": np.ones(9), "accuracy": accuracy,
             "f1": f1, "confusion": confusion, "mask": mask}
 
 
@@ -123,7 +123,6 @@ def ts():
             mask_path = path.join(config.save_data_dir, filename)
             mask[0,0] = 10
             plt.imsave(mask_path, mask)
-            break
 
         # avg_patient_results = m_utils.summarize_metrics(patient_results)
         avg_patient_results = m_utils.average_metrics(patient_results)
