@@ -1,4 +1,4 @@
-from training.train import tt
+from training.retrain import tt
 import argparse
 from training.config import set_data
 
